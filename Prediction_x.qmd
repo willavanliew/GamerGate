@@ -28,7 +28,7 @@ games = pd.read_csv('Video_Games_Sales_as_at_22_Dec_2016.csv')
 
 ```{python}
 # Drop columns 'User_Score', 'Critic_Score', 'User_Count'
-games = games.drop(['User_Score', 'Critic_Count', 'User_Count', 'NA_Sales', 'EU_Sales', 'JP_Sales', 'Other_Sales'], axis=1)
+games = games.drop(['User_Score', 'Critic_Count', 'User_Count'], axis=1)
 
 # Check for missing values
 missing_values = games.isna().sum()
@@ -51,15 +51,13 @@ print(missing_values)
 # Print the cleaned DataFrame
 games.head(10)
 
-
-# Write the filtered DataFrame to a new CSV file
-games.to_csv('Cleaned_MachineLearning_Dataset.csv', index=False)
-
-
 ```
 
 
 # Data Exploration
 ```{python}
+
+# Write the filtered DataFrame to a new CSV file
+games.to_csv('Final_Sales_Dataset.csv', index=False)
 
 ```
