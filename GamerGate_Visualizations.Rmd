@@ -40,3 +40,9 @@ cleaned_games %>%
   ggplot(aes(x = publishers, y = review_score, fill = esrb_rating)) +
   geom_boxplot()
 ```
+```{r New Data vs ESRB & Review Score}
+fresh_data %>% 
+  ggplot(aes(x = platform_name, y = metacritic)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
