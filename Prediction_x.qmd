@@ -1,0 +1,33 @@
+---
+title: "Predicting Review Score (Pre-Alpha ML Model)"
+description: ""
+author: "Brian Cervantes Alvarez"
+date: "06-04-2023"
+format:
+  html:
+    toc: true
+    toc-location: right
+    html-math-method: katex
+    page-layout: full
+execute: 
+  warning: false
+  message: false
+categories: [Python, Machine Learning, Gradient Boosting Machine]
+jupyter: python3
+---
+
+```{python}
+import pandas as pd
+import numpy as np
+
+
+gameSales = pd.read_csv('game_sales.csv')
+gameSales.head(5)
+
+gameRatings = pd.read_csv('game_ratings_updated.csv')
+gameRatings.head(5)
+
+cleanedGames = pd.read_csv('cleaned_games.csv')
+cleanedGames.head(5)
+
+```

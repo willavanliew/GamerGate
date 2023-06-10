@@ -1,8 +1,6 @@
 ---
-title: "Visualizations"
-author: "Willa Van Liew"
-date: "2023-06-10"
-output: html_document
+title: "R Notebook"
+output: html_notebook
 ---
 
 ```{r setup, include=FALSE, echo=FALSE}
