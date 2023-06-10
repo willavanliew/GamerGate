@@ -12,6 +12,9 @@ library(lubridate)
 ```{r load data}
 cleaned_games = read_csv("cleaned_games.csv")
 head(cleaned_games)
+
+fresh_data = read_csv("game_data.csv")
+fresh_data
 ```
 
 ```{r Release Console vs ESRB & Total Sales}
