@@ -14,16 +14,26 @@ cleaned_games = read_csv("cleaned_games.csv")
 head(cleaned_games)
 ```
 
-```{r EDA Overview Tab}
-cleaned_games %>% 
+```{r Release Console vs ESRB & Total Sales}
+cleaned_games %>%
   ggplot(aes(x = reorder(release_console, total_sales), y = total_sales, fill = esrb_rating)) +
   geom_col()
 ```
 
-```{r EDA Comparison Tab}
-
+```{r Release Console vs ESRB & Review Score}
+cleaned_games %>% 
+  ggplot(aes(x = release_console, y = review_score, fill = esrb_rating)) +
+  geom_boxplot()
 ```
 
-```{r ML Model Tab}
+```{r Publisher vs ESRB & Total Sales}
+cleaned_games %>%
+  ggplot(aes(x = reorder(publishers, total_sales), y = total_sales, fill = esrb_rating)) +
+  geom_col()
+```
 
+```{r Publisher vs ESRB & Review Score}
+cleaned_games %>% 
+  ggplot(aes(x = publishers, y = review_score, fill = esrb_rating)) +
+  geom_boxplot()
 ```
