@@ -16,12 +16,17 @@ categories: [Python, Machine Learning, Gradient Boosting Machine]
 jupyter: python3
 ---
 
-```{python}
-import pandas as pd
-import numpy as np
+```{r setup, include=FALSE}
+library(tidyverse)
+library(skimr)
+library(lubridate) 
+```
+
+```{r cars}
+summary(cars)
+```
 
 
-gameSales = pd.read_csv('game_sales.csv')
-
-
+```{r pressure, echo=FALSE}
+plot(pressure)
 ```
