@@ -1,5 +1,5 @@
 ---
-title: "Predicting Review Score (Pre-Alpha ML Model)"
+title: "Predicting Metacritic Score"
 description: ""
 author: "Brian Cervantes Alvarez"
 date: "06-04-2023"
@@ -16,18 +16,50 @@ categories: [Python, Machine Learning, Gradient Boosting Machine]
 jupyter: python3
 ---
 
+# Load Libraries
 ```{python}
 import pandas as pd
 import numpy as np
 
+games = pd.read_csv('Video_Games_Sales_as_at_22_Dec_2016.csv')
+```
 
-gameSales = pd.read_csv('game_sales.csv')
-gameSales.head(5)
+# Data Wrangling
 
-gameRatings = pd.read_csv('game_ratings_updated.csv')
-gameRatings.head(5)
+```{python}
+# Drop columns 'User_Score', 'Critic_Score', 'User_Count'
+games = games.drop(['User_Score', 'Critic_Count', 'User_Count', 'NA_Sales', 'EU_Sales', 'JP_Sales', 'Other_Sales'], axis=1)
 
-cleanedGames = pd.read_csv('cleaned_games.csv')
-cleanedGames.head(5)
+# Check for missing values
+missing_values = games.isna().sum()
+
+# Print the count of missing values for each column
+print(missing_values) 
+
+# Print the cleaned DataFrame
+games.head(10)
+
+# Drop rows with "NaN" values
+games = games.dropna()
+
+# Check for missing values
+missing_values = games.isna().sum()
+
+# Print the count of missing values for each column
+print(missing_values) 
+
+# Print the cleaned DataFrame
+games.head(10)
+
+
+# Write the filtered DataFrame to a new CSV file
+games.to_csv('Cleaned_MachineLearning_Dataset.csv', index=False)
+
+
+```
+
+
+# Data Exploration
+```{python}
 
 ```
