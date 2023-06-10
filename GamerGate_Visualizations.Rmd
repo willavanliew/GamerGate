@@ -1,19 +1,6 @@
 ---
-title: "Predicting Review Score (Pre-Alpha ML Model)"
-description: ""
-author: "Brian Cervantes Alvarez"
-date: "06-04-2023"
-format:
-  html:
-    toc: true
-    toc-location: right
-    html-math-method: katex
-    page-layout: full
-execute: 
-  warning: false
-  message: false
-categories: [Python, Machine Learning, Gradient Boosting Machine]
-jupyter: python3
+title: "R Notebook"
+output: html_notebook
 ---
 
 ```{r setup, include=FALSE}
