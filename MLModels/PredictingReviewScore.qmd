@@ -1,0 +1,288 @@
+---
+title: "Predicting Review Score (Pre-Alpha ML Model)"
+description: ""
+author: "Brian Cervantes Alvarez"
+date: "06-04-2023"
+format:
+  html:
+    toc: true
+    toc-location: right
+    html-math-method: katex
+    page-layout: full
+execute: 
+  warning: false
+  message: false
+categories: [R, Machine Learning, Gradient Boosting Machine]
+---
+
+
+## Abstract
+
+Predicting review scores plays a crucial role in empowering developers to improve the quality of their software or product and enhance user satisfaction. This project focuses on developing a machine learning model to predict review scores based on various factors. By accurately predicting review scores, developers gain valuable insights into user preferences, identify areas for improvement, and proactively address emerging issues. This project explores the benefits of predicting review scores for developers, including quality improvement, user satisfaction, early issue detection, competitive advantage, and data-driven decision making. The project utilizes a comprehensive dataset and applies advanced machine learning techniques to train and evaluate the predictive model. The findings and insights obtained from this project contribute to the field of software development and provide practical implications for developers aiming to enhance their products' performance and success.
+
+## Introduction
+
+Predicting review scores has become increasingly important in the field of software development, as it allows developers to gain insights into user satisfaction, identify areas for improvement, and make informed decisions to enhance their products' quality. The ability to accurately predict review scores provides developers with a competitive advantage and empowers them to address user concerns promptly.
+
+This project aims to develop a machine learning model for predicting review scores based on a diverse set of factors. By leveraging a comprehensive dataset and applying advanced machine learning techniques, the model will be trained to analyze the relationships between various input features and review scores. The project will explore the benefits of predicting review scores for developers, focusing on key aspects such as quality improvement, user satisfaction, early issue detection, competitive advantage, and data-driven decision making.
+
+The findings from this project will offer valuable insights into the significance of predicting review scores and its implications for developers. The results will help developers prioritize their efforts, allocate resources effectively, and make informed decisions to enhance their software or product's performance and success. By leveraging the power of machine learning and predictive analytics, developers can gain a deeper understanding of user preferences, address potential issues proactively, and create products that meet and exceed user expectations.
+
+Overall, this project contributes to the field of software development by emphasizing the importance of predicting review scores and showcasing its benefits for developers. The project's methodology, findings, and recommendations provide valuable guidance for developers seeking to leverage predictive modeling to improve their products and achieve higher user satisfaction.
+
+
+## Methodology 
+
+
+### Load Libraries
+
+
+```{r}
+library(tidyverse)
+library(fastDummies)
+library(caret)
+library(gbm)
+library(pROC)
+```
+
+### Load Datasets
+
+```{r}
+games <- read_csv('Video_Games_Sales_as_at_22_Dec_2016.csv')
+ratings <- read_csv('game_ratings.csv')
+sales <- read_csv('sales_updated.csv')
+updated <- read_csv('sales_updated.csv')
+cleaned <- read_csv('cleaned_games.csv')
+ratings_updated <- read_csv('game_ratings_updated.csv')
+
+```
+
+### Feature Engineering Part 1 (games dataset only)
+
+```{r}
+# NOTE!!! I noticed that the columns handheld, multiplatform, online_play, prev_licensed, sequel, and re_release are all TRUE, I removed these columns at the end since I do not think it makes sense to add them to the machine learning model
+
+# Specify the column names for which dummy variables are required
+dummy_cols <- c("publishers", "release_console", "esrb_rating", "year")
+
+# Create dummy variables
+games <- dummy_cols(games, select_columns = dummy_cols, remove_selected_columns = TRUE)
+
+logical_cols <- c("handheld", "multiplatform", "online_play", 
+                  "prev_licensed", "sequel", "re_release",
+                  "genre_action", "genre_strategy", "genre_racing_driving", 
+                  "genre_sports", "genre_simulation", "genre_adventure",
+                  "genre_rpg", "genre_educational")
+
+# Convert logical columns to numeric (0 and 1)
+games[logical_cols] <- lapply(games[logical_cols], as.integer)
+
+cols_to_remove <- c("handheld", "multiplatform", "online_play", "prev_licensed", "sequel", "re_release", "Title")
+
+games <- games %>% select(-all_of(cols_to_remove))
+
+# Remove rows with missing values
+games <- na.omit(games)
+
+```
+### Model to identify important features
+
+```{r}
+set.seed(123)  # Set seed for reproducibility
+index <- createDataPartition(games$review_score, p = 0.7, list = FALSE)
+train <- games[index, ]
+test <- games[-index, ]
+
+# Set up the training control
+ctrl <- trainControl(method = "cv", number = 3)
+
+# Define the hyperparameter grid
+hyperparameters <- expand.grid(
+  n.trees = 300,
+  interaction.depth = 3,
+  shrinkage = 0.1,
+  n.minobsinnode = 10
+)
+
+# Perform hyperparameter tuning
+fit <- train(
+  review_score ~ .,
+  data = train,
+  method = "gbm",
+  trControl = ctrl,
+  tuneGrid = hyperparameters,
+  verbose = FALSE
+)
+
+# Grab the importance variables
+print(varImp(fit), 10)
+
+```
+### Feature Engineering Part 2 (PCA)
+
+```{r}
+
+# Remove columns of importance
+gm <- games %>%
+  select(-c(total_sales,
+            total_x_complete,
+            max_all_playtime,
+            max_story_complete,
+            med_all_playtime,
+            used_price,
+            total_all_playtime,
+            avg_all_playtime,
+            total_story_complete))
+
+# Check for near-zero variance columns
+nzv_cols <- nearZeroVar(gm, saveMetrics = TRUE)
+
+# Remove near-zero variance columns
+gm <- gm[, !nzv_cols$nzv]
+
+# Perform Principal Component Analysis (PCA)
+pr_games <- prcomp(gm, scale = TRUE, center = TRUE)
+
+# Get the variance explained by each principal component
+var_explained <- pr_games$sdev^2 / sum(pr_games$sdev^2)
+
+# Plot the scree plot
+plot(1:length(var_explained), var_explained, type = "b",
+     xlab = "Principal Component", ylab = "Variance Explained",
+     main = "Scree Plot")
+
+# Add cumulative variance explained
+cum_var_explained <- cumsum(var_explained)
+lines(1:length(cum_var_explained), cum_var_explained, type = "b", col = "red")
+
+# Add labels to the principal components with label adjustment
+pc_labels <- paste0("PC", 1:length(var_explained))
+text_adjust <- 0.05  # Label adjustment factor
+label_pos <- var_explained + text_adjust
+selected_labels <- c(1, seq(5, length(var_explained), by = 5))  # Display labels at regular intervals
+text(selected_labels, label_pos[selected_labels], labels = pc_labels[selected_labels], pos = 3)
+
+```
+```{r}
+# Convert rotation matrix to a data frame and add row names as a column
+rotation_df <- rownames_to_column(as.data.frame(pr_games$rotation))
+
+# Select the first 11 columns
+rotation_df <- select(rotation_df, 1:11)
+
+# Filter the rows based on absolute values of PC1 to PC10
+filtered_df <- filter(rotation_df,
+                      abs(PC1) >= 0.35 | abs(PC2) >= 0.35 | abs(PC3) >= 0.35 |
+                      abs(PC4) >= 0.35 | abs(PC5) >= 0.35 | abs(PC6) >= 0.35 |
+                      abs(PC7) >= 0.35 | abs(PC8) >= 0.35 | abs(PC9) >= 0.35 |
+                      abs(PC10) >= 0.35)
+filtered_df
+```
+
+
+```{r}
+
+# Combine original columns with PCA values
+gm <- 
+  bind_cols(select(games,
+                   c(total_sales,
+                    total_x_complete,
+                    max_all_playtime,
+                    max_story_complete,
+                    med_all_playtime,
+                    used_price,
+                    total_all_playtime,
+                    avg_all_playtime,
+                    total_story_complete,
+                    review_score)),
+            as.data.frame(pr_games$x)) %>%
+  select(1:20) %>%
+  ungroup() %>%
+  rename("PCA1" = PC1,
+         "PCA2" = PC2,
+         "PCA3" = PC3,
+         "PCA4" = PC4,
+         "PCA5" = PC5,
+         "PCA6" = PC6,
+         "PCA7" = PC7,
+         "PCA8" = PC8,
+         "PCA9" = PC9,
+         "PCA10" = PC10)
+
+#head(games)
+
+```
+
+### Construct Final Model
+
+```{r}
+set.seed(1738)  # Set seed for reproducibility
+index <- createDataPartition(gm$review_score, p = 0.7, list = FALSE)
+train <- gm[index, ]
+test <- gm[-index, ]
+
+# Set up the training control
+ctrl <- trainControl(method = "cv", number = 5)
+
+# Define the hyperparameter grid
+hyperparameters <- expand.grid(
+  n.trees = 400,
+  interaction.depth = 3,
+  shrinkage = 0.1,
+  n.minobsinnode = 10
+)
+
+# Perform hyperparameter tuning
+fit <- train(
+  review_score ~ .,
+  data = train,
+  method = "gbm",
+  trControl = ctrl,
+  tuneGrid = hyperparameters,
+  verbose = FALSE,
+)
+
+fit
+```
+
+## Results
+
+In the final evaluation of the review score prediction model, the following metrics were obtained:
+
+Root Mean Squared Error (RMSE): The RMSE value measures the average deviation between the predicted review scores and the actual review scores. In this project, the RMSE value was calculated to be 8.267027. A lower RMSE indicates better accuracy of the model's predictions.
+
+R-squared (Rsquared): The Rsquared value represents the proportion of variance in the review scores that can be explained by the model. A value of 0.5986856 indicates that approximately 59.87% of the variance in the review scores can be explained by the model. A higher Rsquared value suggests a better fit of the model to the data.
+
+Mean Absolute Error (MAE): The MAE represents the average absolute difference between the predicted review scores and the actual review scores. In this project, the MAE value was calculated to be 6.575159. A lower MAE indicates better accuracy and a closer match between the predicted and actual review scores.
+
+These metrics provide a quantitative assessment of the performance of the review score prediction model. The obtained values indicate that the model achieved a reasonable level of accuracy, with relatively low RMSE and MAE values. The Rsquared value suggests that the model explains a significant portion of the variance in the review scores.
+
+By considering these metrics, developers can assess the effectiveness of the model in predicting review scores and make data-driven decisions to improve their products' quality and address user satisfaction. It is important to note that these metrics serve as objective measures to evaluate the model's performance, and further analysis and interpretation may be required to fully understand the implications for developers and potential areas for improvement.
+
+## Data Wrangling (Attempt to combine games + sales datasets)
+
+```{r}
+#missing_counts <- colSums(is.na(games))
+#print(missing_counts)
+
+# Fix the N/A values and see how many are missing per column for sales dataset
+#sales[sales == "N/A"] <- NA
+#missing_counts <- colSums(is.na(sales))
+#print(missing_counts)
+
+# Remove these columns: criticscore, userscore have too many missing values
+#sales <- sales %>%
+#  select(-criticscore,
+#         -userscore,
+#         -...1)
+
+# Find the rows that have no missing values or "complete cases"
+#sales <- sales[complete.cases(sales), ]
+# Remove unnecessary string found in a few titles
+#sales$gname <- gsub("Read the review$", "", sales$gname)
+
+# Perform a left join to keep all rows from the sales dataset
+#gameSales <- merge(games, sales, by.x = "Title", by.y = "gname", all.x = TRUE, all.y = TRUE)
+#gameSales <- gameSales[complete.cases(gameSales), ]
+
+```

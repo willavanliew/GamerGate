@@ -1,0 +1,31 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(skimr)
+library(lubridate) 
+```
+```{r}
+games <- read_csv("cleaned_games.csv")
+
+unique(games$max_players)
+```
+
+```{r}
+games %>%
+  select(-c(handheld, multiplatform, online_play, prev_licensed, sequel, re_release))
+```
+```{r}
+games %>%
+  ggplot(aes(max_players)) +
+  geom_histogram(stat="bin")
+```
+
+```{r}
+games %>%
+  select(total_sales, genre_action, genre_adventure, genre_strategy,genre_racing_driving, genre_sports)
+```
+
