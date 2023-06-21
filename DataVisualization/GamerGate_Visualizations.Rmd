@@ -11,7 +11,7 @@ library(lubridate)
 
 ```{r load data}
 cleaned_games = read_csv("cleaned_games.csv")
-head(cleaned_games)
+cleaned_games
 
 fresh_data = read_csv("game_data.csv")
 fresh_data
@@ -20,23 +20,42 @@ fresh_data
 ```{r Release Console vs ESRB & Total Sales}
 cleaned_games %>%
   ggplot(aes(x = reorder(release_console, total_sales), y = total_sales, fill = esrb_rating)) +
-  geom_col()
+  geom_col()+
+  labs(title = "Console Sales by ESRB Ratings", x = "Console Type", y = "Total Sales", fill = "ESRB Ratings")
 ```
 
 ```{r Release Console vs ESRB & Review Score}
 cleaned_games %>% 
   ggplot(aes(x = release_console, y = review_score, fill = esrb_rating)) +
-  geom_boxplot()
+  geom_boxplot()+
+  labs(title = "Review Scores by Console and ESRB Ratings", x = "Console Type", y = "Review Scores", fill = "ESRB Ratings")
 ```
 
 ```{r Publisher vs ESRB & Total Sales}
 cleaned_games %>%
   ggplot(aes(x = reorder(publishers, total_sales), y = total_sales, fill = esrb_rating)) +
-  geom_col()
+  geom_col()+
+  labs(title = "Publisher Sales by ESRB Ratings", x = "Publisher Name", y = "Total Sales", fill = "ESRB Ratings")
 ```
 
 ```{r Publisher vs ESRB & Review Score}
 cleaned_games %>% 
   ggplot(aes(x = publishers, y = review_score, fill = esrb_rating)) +
-  geom_boxplot()
+  geom_boxplot()+
+  labs(title = "Review Scores by Publisher and ESRB Ratings", x = "Publisher Name", y = "Review Scores", fill = "ESRB Ratings")
+```
+```{r New Data vs ESRB & Review Score}
+fresh_data %>% 
+  ggplot(aes(x = platform_name, y = metacritic)) +
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  labs(title = "Metacritic Scores by Console", x = "Console Type", y = "Review Scores")
+```
+
+```{r New Data vs ESRB & Total Sales}
+fresh_data %>%
+  ggplot(aes(x = platform_name, y = esrb_rating_name)) +
+  geom_col()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  labs(title = "Number of Consoles", x = "Console Type", y = "Count of Games")
 ```
