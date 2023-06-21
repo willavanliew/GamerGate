@@ -82,7 +82,7 @@ games['Year_of_Release'].unique()
 games.head(5)
 games.columns
 
-# Assuming you have a DataFrame named 'games'
+
 dummy_cols = ['Platform', 'Year_of_Release', 'Genre', 'Publisher', 'Developer', 'Rating']
 
 games.columns
