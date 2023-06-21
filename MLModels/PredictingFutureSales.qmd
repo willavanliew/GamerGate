@@ -83,6 +83,9 @@ games.head(5)
 games.columns
 
 
+games.drop(['Name', 'Year_of_Release'], axis=1, inplace=True)
+games.head(5)
+
 dummy_cols = ['Platform', 'Year_of_Release', 'Genre', 'Publisher', 'Developer', 'Rating']
 
 games.columns
@@ -93,10 +96,6 @@ games = pd.get_dummies(games, columns=dummy_cols)
 #print(games_with_dummies)
 games.shape
 games.head(5)
-
-games.drop('Name', axis=1, inplace=True)
-games.head(5)
-
 
 ```
 
