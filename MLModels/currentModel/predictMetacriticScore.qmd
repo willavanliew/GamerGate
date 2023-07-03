@@ -1,0 +1,211 @@
+---
+title: "Predicting Future Sales"
+description: ""
+author: "Brian Cervantes Alvarez"
+date: "07-03-2023"
+format:
+  html:
+    toc: true
+    toc-location: right
+    html-math-method: katex
+    page-layout: full
+execute: 
+  warning: false
+  message: false
+categories: [Python, Machine Learning]
+jupyter: python3
+---
+
+# Load Libraries
+```{python}
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+import tensorflow as tf
+import xgboost as xgb
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.cluster import KMeans
+from kmodes.kmodes import KModes
+```
+
+## Data Preprocessing and Analysis
+
+These operations demonstrate common data preprocessing tasks such as reading data, removing columns, handling missing values, creating new columns, converting data types, and performing basic analysis on the data.
+
+```{python}
+# Read the CSV file into a DataFrame
+games = pd.read_csv("metacriticML.csv")
+
+# Remove the specified columns
+columns_to_remove = ['name', 'id', 'tba', 'background_image', 'updated', 'platform_id', 'esrb_rating_id', 'added']
+games.drop(columns_to_remove, axis=1, inplace=True)
+
+# Display the first 5 rows of the DataFrame
+print("\nFirst 5 rows of the DataFrame:")
+print(games.head(5))
+
+# Find the columns with missing values
+columns_with_missing_values = games.columns[games.isna().any()].tolist()
+
+# Print the number of missing values for each column
+print("\nNumber of missing values per column:")
+for column in columns_with_missing_values:
+    missing_count = games[column].isna().sum()
+    print(f"{column}: {missing_count}")
+
+# Drop the missing values
+games.dropna(inplace=True)
+
+# Verify the new shape of the DataFrame after dropping missing values
+print("\nShape after dropping missing values:", games.shape)
+
+# Define rating ranges and corresponding labels
+rating_ranges = [(0, 59, "Poor"),
+                 (60, 69, "Mixed"),
+                 (70, 79, "Good"),
+                 (80, 84, "Great"),
+                 (85, 89, "Excellent"),
+                 (90, 100, "Masterpiece")]
+
+# Create a new column for the categorical labels
+games["rating_category"] = pd.cut(games["metacritic"], bins=[r[0] for r in rating_ranges] + [101],
+                                  labels=[r[2] for r in rating_ranges], right=False)
+
+# Print the first 5 rows with the new rating category column
+print(games.head(5))
+print("Shape:", games.shape)
+
+# Convert "released" column to datetime type
+games["released"] = pd.to_datetime(games["released"])
+
+# Find the minimum and maximum dates
+min_date = games["released"].min()
+max_date = games["released"].max()
+
+# Print the range of dates
+print("Range of Dates:")
+print("Min Date:", min_date)
+print("Max Date:", max_date)
+
+print(games.columns)
+```
+
+### Pairplot Visualization
+
+This code block demonstrates the process of selecting specific columns, converting data types, and using Seaborn and Matplotlib libraries to create a pairplot visualization for analyzing the relationships between different variables in the data.
+
+```{python}
+
+# Select the columns to include in the pairplot
+columns_to_visualize = ['released', 'rating', 'rating_top', 'ratings_count',
+                        'reviews_text_count', 'metacritic', 'playtime',
+                        'suggestions_count', 'esrb_rating_name', 'platform_name',
+                        'rating_category']
+
+# Filter the DataFrame to include only the selected columns
+selected_columns_df = games[columns_to_visualize]
+
+# Convert the 'released' column to datetime type
+selected_columns_df['released'] = pd.to_datetime(selected_columns_df['released'])
+
+# Set the figure size and DPI
+plt.figure(figsize=(12, 8), dpi=500)
+
+# Create a pairplot using Seaborn
+sns.pairplot(selected_columns_df, diag_kind='kde', hue='rating_category')
+
+# Rotate x-axis labels
+plt.xticks(rotation=45)
+
+# Show the plot
+plt.show()
+plt.close()
+
+```
+
+### Scatter Plot Comparisons
+
+ This code chunk shows a visual analysis of the relationships between the "metacritic" ratings and various features, providing insights into how different factors might impact the overall rating.
+```{python}
+# Select the columns for comparison
+comparison_columns = ['rating', 'rating_top', 'ratings_count',
+                      'reviews_text_count', 'playtime',
+                      'suggestions_count']
+
+# Create scatter plots to compare "metacritic" with each column
+for column in comparison_columns:
+    plt.figure(figsize=(8, 6))
+    sns.scatterplot(data=games, x = 'metacritic', y = column, hue='rating_category')
+    plt.xlabel(column)
+    plt.ylabel('Metacritic')
+    plt.title(f'Comparison: {column} vs. Metacritic')
+    plt.legend(title='Rating Category')
+    plt.show()
+
+```
+
+### K-means Clustering and Scatter Plot Matrix
+
+This allows for the exploration and analysis of patterns and relationships within the data, helping to identify similarities or differences among different clusters.
+
+```{python}
+# Select the columns for clustering
+clustering_columns = ['rating', 'rating_top', 'ratings_count',
+                      'reviews_text_count', 'playtime',
+                      'suggestions_count']
+
+# Extract the data for clustering
+X = games[clustering_columns]
+
+# Perform K-means clustering
+kmeans = KMeans(n_clusters=3, random_state=42)
+kmeans.fit(X)
+
+# Get the cluster labels
+cluster_labels = kmeans.labels_
+
+# Add the cluster labels to the DataFrame
+games['cluster'] = cluster_labels
+
+# Create a scatter plot matrix with color-coded clusters
+sns.set(style="ticks")
+sns.pairplot(data=games, vars=clustering_columns, hue='cluster', palette='viridis')
+plt.suptitle("Scatter Plot Matrix with Cluster Labels")
+plt.show()
+```
+
+### K-modes Clustering and Cluster Distribution Visualization
+
+K-modes clustering allows for visualizing the distribution of clusters for each categorical feature. It provides insights into how the categorical variables are grouped into different clusters and allows for the exploration and analysis of patterns and relationships within the data.
+
+```{python}
+# Select the columns for clustering
+columns_to_cluster = ['esrb_rating_name', 'platform_name', 'rating_category']
+
+# Extract the data for clustering
+X = games[columns_to_cluster]
+
+# Perform K-modes clustering
+k_modes = KModes(n_clusters=3, init='Huang', n_init=5, verbose=1)
+clusters = k_modes.fit_predict(X)
+
+# Add the cluster labels to the DataFrame
+games['cluster'] = clusters
+
+# Visualize the distribution of clusters for each categorical feature
+for column in columns_to_cluster:
+    plt.figure(figsize=(8, 6))
+    sns.countplot(data=games, x=column, hue='cluster', palette='viridis')
+    plt.xlabel(column)
+    plt.ylabel('Count')
+    plt.title(f'Cluster Distribution: {column}')
+    plt.legend(title='Cluster')
+    plt.xticks(rotation=90)
+    plt.show()
+
+```
