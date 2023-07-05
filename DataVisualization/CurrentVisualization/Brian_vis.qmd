@@ -1,0 +1,31 @@
+---
+title: "Data Visualization on Metacritic Scores"
+description: ""
+author: "Brian Cervantes Alvarez"
+date: "07-05-2023"
+format:
+  html:
+    toc: true
+    toc-location: right
+    html-math-method: katex
+    page-layout: full
+execute: 
+  warning: false
+  message: false
+categories: [R, Machine Learning]
+---
+
+
+```{r}
+library(tidyverse)
+#setwd("~/Documents/VSCode_Github/GamerGate/DataVisualization/CurrentVisualization")
+
+ds <- read_csv("gamesMetacritic.csv")
+
+head(ds, 5)
+
+ds <- ds %>% select(-description)
+
+head(ds, 5)
+
+```
