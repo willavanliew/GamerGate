@@ -39,10 +39,11 @@ These operations demonstrate common data preprocessing tasks such as reading dat
 
 ```{python}
 # Read the CSV file into a DataFrame
-games = pd.read_csv("metacriticML.csv")
+games = pd.read_csv("gamesMetacritic.csv")
+print(games.shape)
 
 # Remove the specified columns
-columns_to_remove = ['name', 'id', 'tba', 'background_image', 'updated', 'platform_id', 'esrb_rating_id', 'added']
+columns_to_remove = ['id', 'background_image']
 games.drop(columns_to_remove, axis=1, inplace=True)
 
 # Display the first 5 rows of the DataFrame
@@ -95,36 +96,49 @@ print("Max Date:", max_date)
 print(games.columns)
 ```
 
+```{python}
+# Calculate the total number of rows per genre
+genre_counts = games['genre'].value_counts()
+
+# Display the genre counts
+print(genre_counts)
+
+
+# Create an empty DataFrame to store the randomly selected samples
+random_samples = pd.DataFrame()
+
+# Iterate over each genre
+for genre in games['genre'].unique():
+    # Filter the DataFrame to include only rows with the current genre
+    genre_df = games[games['genre'] == genre]
+    
+    # Randomly select 1000 samples from the current genre
+    genre_samples = genre_df.sample(n = 1000, random_state = 89)  # Adjust the random_state if needed
+    
+    # Append the selected samples to the random_samples DataFrame
+    random_samples = pd.concat([random_samples, genre_samples])
+
+# Display the randomly selected samples
+print(random_samples)
+print(random_samples.head(5))
+
+
+gamesDs = random_samples
+
+```
+
+
+```{python}
+gamesDs.columns
+```
+
+
+
 ### Pairplot Visualization
 
 This code block demonstrates the process of selecting specific columns, converting data types, and using Seaborn and Matplotlib libraries to create a pairplot visualization for analyzing the relationships between different variables in the data.
 
 ```{python}
-
-# Select the columns to include in the pairplot
-columns_to_visualize = ['released', 'rating', 'rating_top', 'ratings_count',
-                        'reviews_text_count', 'metacritic', 'playtime',
-                        'suggestions_count', 'esrb_rating_name', 'platform_name',
-                        'rating_category']
-
-# Filter the DataFrame to include only the selected columns
-selected_columns_df = games[columns_to_visualize]
-
-# Convert the 'released' column to datetime type
-selected_columns_df['released'] = pd.to_datetime(selected_columns_df['released'])
-
-# Set the figure size and DPI
-plt.figure(figsize=(12, 8), dpi=500)
-
-# Create a pairplot using Seaborn
-sns.pairplot(selected_columns_df, diag_kind='kde', hue='rating_category')
-
-# Rotate x-axis labels
-plt.xticks(rotation=45)
-
-# Show the plot
-plt.show()
-plt.close()
 
 ```
 
@@ -132,20 +146,7 @@ plt.close()
 
  This code chunk shows a visual analysis of the relationships between the "metacritic" ratings and various features, providing insights into how different factors might impact the overall rating.
 ```{python}
-# Select the columns for comparison
-comparison_columns = ['rating', 'rating_top', 'ratings_count',
-                      'reviews_text_count', 'playtime',
-                      'suggestions_count']
 
-# Create scatter plots to compare "metacritic" with each column
-for column in comparison_columns:
-    plt.figure(figsize=(8, 6))
-    sns.scatterplot(data=games, x = 'metacritic', y = column, hue='rating_category')
-    plt.xlabel(column)
-    plt.ylabel('Metacritic')
-    plt.title(f'Comparison: {column} vs. Metacritic')
-    plt.legend(title='Rating Category')
-    plt.show()
 
 ```
 
@@ -154,29 +155,7 @@ for column in comparison_columns:
 This allows for the exploration and analysis of patterns and relationships within the data, helping to identify similarities or differences among different clusters.
 
 ```{python}
-# Select the columns for clustering
-clustering_columns = ['rating', 'rating_top', 'ratings_count',
-                      'reviews_text_count', 'playtime',
-                      'suggestions_count']
 
-# Extract the data for clustering
-X = games[clustering_columns]
-
-# Perform K-means clustering
-kmeans = KMeans(n_clusters=3, random_state=42)
-kmeans.fit(X)
-
-# Get the cluster labels
-cluster_labels = kmeans.labels_
-
-# Add the cluster labels to the DataFrame
-games['cluster'] = cluster_labels
-
-# Create a scatter plot matrix with color-coded clusters
-sns.set(style="ticks")
-sns.pairplot(data=games, vars=clustering_columns, hue='cluster', palette='viridis')
-plt.suptitle("Scatter Plot Matrix with Cluster Labels")
-plt.show()
 ```
 
 ### K-modes Clustering and Cluster Distribution Visualization
@@ -184,28 +163,6 @@ plt.show()
 K-modes clustering allows for visualizing the distribution of clusters for each categorical feature. It provides insights into how the categorical variables are grouped into different clusters and allows for the exploration and analysis of patterns and relationships within the data.
 
 ```{python}
-# Select the columns for clustering
-columns_to_cluster = ['esrb_rating_name', 'platform_name', 'rating_category']
 
-# Extract the data for clustering
-X = games[columns_to_cluster]
-
-# Perform K-modes clustering
-k_modes = KModes(n_clusters=3, init='Huang', n_init=5, verbose=1)
-clusters = k_modes.fit_predict(X)
-
-# Add the cluster labels to the DataFrame
-games['cluster'] = clusters
-
-# Visualize the distribution of clusters for each categorical feature
-for column in columns_to_cluster:
-    plt.figure(figsize=(8, 6))
-    sns.countplot(data=games, x=column, hue='cluster', palette='viridis')
-    plt.xlabel(column)
-    plt.ylabel('Count')
-    plt.title(f'Cluster Distribution: {column}')
-    plt.legend(title='Cluster')
-    plt.xticks(rotation=90)
-    plt.show()
 
 ```
