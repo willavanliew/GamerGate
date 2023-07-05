@@ -15,17 +15,173 @@ unique(games$max_players)
 ```
 
 ```{r}
-games %>%
+games <- games %>%
   select(-c(handheld, multiplatform, online_play, prev_licensed, sequel, re_release))
+```
+
+```{r}
+games_action <- games %>%
+  filter(genre_action == TRUE)
+games_strat <- games %>%
+  filter(genre_strategy == TRUE)
+games_race <- games %>%
+  filter(genre_racing_driving == TRUE)
+games_sports <- games %>%
+  filter(genre_sports == TRUE)
+games_sim <- games %>%
+  filter(genre_simulation == TRUE)
+games_adv <- games %>%
+  filter(genre_adventure == TRUE)
+games_rpg <- games %>%
+  filter(genre_rpg == TRUE)
+games_ed <- games %>%
+  filter(genre_educational == TRUE)
+
+games_action %>%
+  summarize(num_games = n(), avg_reviewscore = mean(review_score), med_review_score = median(review_score), avg_sales = mean(total_sales), total_total_sales = sum(total_sales))
+```
+```{r}
+games_strat %>%
+  summarize(num_games = n(), avg_reviewscore = mean(review_score), med_review_score = median(review_score), avg_sales = mean(total_sales), total_total_sales = sum(total_sales))
+```
+```{r}
+games_adv %>%
+  summarize(num_games = n(), avg_reviewscore = mean(review_score), med_review_score = median(review_score), avg_sales = mean(total_sales), total_total_sales = sum(total_sales))
+```
+```{r}
+games_ed %>%
+  summarize(num_games = n(), avg_reviewscore = mean(review_score), med_review_score = median(review_score), avg_sales = mean(total_sales), total_total_sales = sum(total_sales))
+```
+
+```{r}
+games_race %>%
+  summarize(num_games = n(), avg_reviewscore = mean(review_score), med_review_score = median(review_score), avg_sales = mean(total_sales), total_total_sales = sum(total_sales))
+```
+
+```{r}
+games_rpg %>%
+  summarize(num_games = n(), avg_reviewscore = mean(review_score), med_review_score = median(review_score), avg_sales = mean(total_sales), total_total_sales = sum(total_sales))
+```
+```{r}
+games_sim %>%
+  summarize(num_games = n(), avg_reviewscore = mean(review_score), med_review_score = median(review_score), avg_sales = mean(total_sales), total_total_sales = sum(total_sales))
+```
+```{r}
+games_sports %>%
+  summarize(num_games = n(), avg_reviewscore = mean(review_score), med_review_score = median(review_score), avg_sales = mean(total_sales), total_total_sales = sum(total_sales))
+```
+```{r}
+publish <- as.tibble(unique(games$publishers))
+
+games <- games %>%
+  mutate(pub_Nintendo = str_detect(publishers, "Nintendo"),
+         pub_Ubisoft = str_detect(publishers, "Ubisoft"),
+         pub_Sony = str_detect(publishers, "Sony"),
+         pub_Activision = str_detect(publishers, "Activision"),
+         pub_EA = str_detect(publishers, "EA"),
+         pub_namco = str_detect(publishers, "Namco"),
+         pub_konami = str_detect(publishers, "Konami"),
+         pub_koei = str_detect(publishers, "Koei"),
+         pub_sega = str_detect(publishers, "Sega"),
+         pub_capcom = str_detect(publishers, "Capcom"),
+         pub_rockstar = str_detect(publishers, "Rockstar"),
+         pub_THQ = str_detect(publishers, "THQ"),
+         pub_2K = str_detect(publishers, "2K"),
+         pub_D3 = str_detect(publishers, "D3"),
+         pub_vivendi = str_detect(publishers, "Vivendi"),
+         pub_majesco = str_detect(publishers, "Majesco"),
+         pub_microsoft = str_detect(publishers, "Microsoft"),
+         pub_SquareEnix = str_detect(publishers, "SquareEnix"),
+         pub_505 = str_detect(publishers, "505 Games"),
+         pub_Atari = str_detect(publishers, "Atari"),
+         pub_Spike = str_detect(publishers, "Spike"),
+         pub_RisingStar = str_detect(publishers, "Rising Star"),
+         pub_Midway = str_detect(publishers, "Midway"),
+         pub_Spike = str_detect(publishers, "LucasArts"),
+         pub_Eidos = str_detect(publishers, "Eidos"),
+         pub_WarnerBros = str_detect(publishers, "Warner Bros"),
+         pub_Atlus = str_detect(publishers, "Atlus"),
+         pub_Codemasters = str_detect(publishers, "Codemasters"),
+         pub_Disney = str_detect(publishers, "Disney"),
+        pub_count = str_count(publishers, ",") + 1,
+        pub_other = publishers %in% c("Marvelous","The Adventure Company", "Conspiracy Entertainment","ZOO Digital","Zoo", "Bethesda",
+                                             "Crave", "Gameloft","Aksys","Brash","Red Mile Entertainment","Oxygen Games","Sierra Entertainment",
+                                             "Noise Factory","Idea Factory","Digital Entertainment Pool", "System 3","Sandlot Games","Destineer",
+                                            "Funbox Media", "Virgin Play","V.2 Play","RTL Games", "Nippon Ichi Software", "MumboJumbo", "SNK",
+                                            "Valve", "Disney Interactive Studios", "TopWare Interactive","PlayFirst", "Mindscape", "MTV Games",
+                                            "Idigicon", "Nihon Falcom", "Deep Silver", "Gamecock", "GameCock", "Xplosiv","Banpresto", "Sting",
+                                            "Success Corporation", "Interactive Brains", "SCEI", "NIS America", "The Game Factory", 
+                                            "Arc System Works","Atlas","Natsume", "Hudson Soft", "SouthPeak", "Xseed Games", "SNK Playmore", 
+                                            "Now Production", "Take-Two Interactive", "Mastiff", "Empire Interactive", "Taito", "Bandai",
+                                            "Buena Vista", "Tecmo", "Ignition", "Agetec", "FromSoftware"))
+         )
+
+write_csv(games, )
+publishers <- games[38:129]
+
+pubs<- pubcounts %>%
+  filter(val < 10) %>%
+  select(publisher)
+
+write_csv(pubs, "/Users/willavanliew/Documents/DS-Masters/Capstone/publisher.csv")
+pubs
+```
+```{r}
+#publishers with only one appearance
+summary(publishers)
+
+pubs <- publishers %>%
+  pivot_longer(0:91, names_to = "publisher", values_to = "count") %>%
+  mutate(count = ifelse(count == TRUE, 1, 0))
+
+pubcounts = pubs %>%
+  group_by(publisher)%>%
+  summarise(val = sum(count, na.rm = T)) %>%
+  arrange(desc(val))
+
+pubcounts %>%
+  filter(val < 10) 
+
+games %>%
+  mutate(Other = )
+```
+
+
+```{r}
+games2<-games[,!(names(games) %in% as_vector(one_count))]
+
+publishers_p2 <- games2[38:99]
+
+pubs2 <- publishers_p2 %>%
+  pivot_longer(0:61, names_to = "publisher", values_to = "count") %>%
+  mutate(count = ifelse(count == TRUE, 1, 0))
+
+pubcounts2 = pubs2 %>%
+  filter(pub_count > 1) %>%
+  group_by(publisher)%>%
+  summarise(val = sum(count, na.rm = T))
+
+pubs
+one_count<- pubcounts %>%
+  filter(val == 1) %>%
+  select(publisher)
+
+pubcounts2
 ```
 ```{r}
 games %>%
-  ggplot(aes(max_players)) +
-  geom_histogram(stat="bin")
+  filter()
+
+
 ```
 
 ```{r}
 games %>%
-  select(total_sales, genre_action, genre_adventure, genre_strategy,genre_racing_driving, genre_sports)
+  mutate(pub_other = ifelse())
+```
+
+```{r}
+games %>%
+  filter(str_detect(publishers, "SCEI"))
 ```
 
