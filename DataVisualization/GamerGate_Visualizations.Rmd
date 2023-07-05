@@ -10,11 +10,8 @@ library(lubridate)
 ```
 
 ```{r load data}
-cleaned_games = read_csv("cleaned_games.csv")
-cleaned_games
-
-fresh_data = read_csv("game_data.csv")
-fresh_data
+critic_review = read_csv("metacriticML.csv")
+critic_review
 ```
 
 ```{r Release Console vs ESRB & Total Sales}
