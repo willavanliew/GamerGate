@@ -21,4 +21,7 @@ library(rio)
 games <- import("master.csv")
 ```
 
+```{r}
+games 
+```
 
