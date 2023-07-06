@@ -8,6 +8,8 @@ library(tidyverse)
 library(skimr)
 library(lubridate)
 library(DataExplorer)
+library(devtools)
+library(inspectdf)
 ```
 
 ```{r load data}
@@ -18,11 +20,20 @@ head(critic_review)
 ```{r General Info}
 summary(critic_review)
 skim(critic_review)
-glimpse(critic_review)
 dim(critic_review)
+dplyr::glimpse(critic_review)
 ```
 ```{r Create General Report}
 DataExplorer::create_report(critic_review)
+```
+
+```{r Inspect}
+inspect_types(critic_review) %>% show_plot()
+inspect_mem(critic_review) %>% show_plot()
+inspect_na(critic_review) %>% show_plot()
+inspect_num(critic_review) %>% show_plot()
+inspect_cat(critic_review) %>% show_plot()
+inspect_cor(critic_review) %>% show_plot()
 ```
 
 ```{r Release Console vs ESRB & Review Score}
