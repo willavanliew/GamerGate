@@ -1,0 +1,43 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+library(tidyverse)
+library(skimr)
+library(lubridate) 
+```
+
+```{r load data}
+critic_review = read_csv("master.csv")
+critic_review
+```
+
+```{r}
+
+```
+
+```{r Release Console vs ESRB & Review Score}
+critic_review %>% 
+  ggplot(aes(x = platform_name, y = metacritic, fill = esrb_rating_name)) +
+  geom_boxplot() +
+  labs(title = "Review Scores by Console and ESRB Ratings", x = "Console Type", y = "Review Scores", fill = "ESRB Ratings") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
