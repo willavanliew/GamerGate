@@ -21,7 +21,23 @@ library(rio)
 games <- import("master.csv")
 ```
 
+### Seasons
 ```{r}
-games 
+games %>%
+  group_by(season, genre) %>%
+  summarize(n=n())
+```
+
+### Distinct Games
+```{r}
+unique_games = games %>% select(-platform_name) %>% distinct()
+```
+```{r}
+unique(games$platform_name)
+```
+```{r}
+unique_games %>%
+  ggplot(aes(season, metacritic)) +
+  geom_point(position = "jitter", alpha = 0.5)
 ```
 
