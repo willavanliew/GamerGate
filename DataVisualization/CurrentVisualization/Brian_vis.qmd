@@ -17,15 +17,35 @@ categories: [R, Machine Learning]
 
 
 ```{r}
-library(tidyverse)
+library(dplyr)
+library(readr)
 #setwd("~/Documents/VSCode_Github/GamerGate/DataVisualization/CurrentVisualization")
 
-ds <- read_csv("gamesMetacritic.csv")
+ds <- read_csv("master.csv")
+head(ds$released, 5)
 
+```
+
+
+```{r}
+# Display the first 5 rows of the dataset before filtering, removing the column, and dropping NAs
 head(ds, 5)
 
+# Remove the "description" column
 ds <- ds %>% select(-description)
 
+# Drop rows with missing values
+ds <- drop_na(ds)
+
+# Filter the released dates to be from Jan 1st, 2013, to June 30th, 2023
+ds <- ds %>% filter(released >= "2013-01-01" & released <= "2023-06-30")
+
+# Display the first 5 rows of the filtered dataset
 head(ds, 5)
+
+# Display the structure of the filtered dataset
+glimpse(ds)
+
+length(unique(ds$name))
 
 ```

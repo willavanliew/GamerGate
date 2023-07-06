@@ -38,17 +38,11 @@ from kmodes.kmodes import KModes
 These operations demonstrate common data preprocessing tasks such as reading data, removing columns, handling missing values, creating new columns, converting data types, and performing basic analysis on the data.
 
 ```{python}
+import pandas as pd
+
 # Read the CSV file into a DataFrame
 games = pd.read_csv("gamesMetacritic.csv")
 print(games.shape)
-
-# Remove the specified columns
-columns_to_remove = ['id', 'background_image']
-games.drop(columns_to_remove, axis=1, inplace=True)
-
-# Display the first 5 rows of the DataFrame
-print("\nFirst 5 rows of the DataFrame:")
-print(games.head(5))
 
 # Find the columns with missing values
 columns_with_missing_values = games.columns[games.isna().any()].tolist()
@@ -62,9 +56,6 @@ for column in columns_with_missing_values:
 # Drop the missing values
 games.dropna(inplace=True)
 
-# Verify the new shape of the DataFrame after dropping missing values
-print("\nShape after dropping missing values:", games.shape)
-
 # Define rating ranges and corresponding labels
 rating_ranges = [(0, 59, "Poor"),
                  (60, 69, "Mixed"),
@@ -74,26 +65,47 @@ rating_ranges = [(0, 59, "Poor"),
                  (90, 100, "Masterpiece")]
 
 # Create a new column for the categorical labels
-games["rating_category"] = pd.cut(games["metacritic"], bins=[r[0] for r in rating_ranges] + [101],
-                                  labels=[r[2] for r in rating_ranges], right=False)
-
-# Print the first 5 rows with the new rating category column
-print(games.head(5))
-print("Shape:", games.shape)
+games["metacritic_category"] = pd.cut(games["metacritic"], bins=[r[0] for r in rating_ranges] + [101], labels=[r[2] for r in rating_ranges], right=False)
 
 # Convert "released" column to datetime type
 games["released"] = pd.to_datetime(games["released"])
 
-# Find the minimum and maximum dates
-min_date = games["released"].min()
-max_date = games["released"].max()
+# Define the season based on release dates
+def get_season(date):
+    if date.month in (12, 1, 2):
+        return "Holiday"
+    elif date.month in (3, 4, 5):
+        return "Spring"
+    elif date.month in (6, 7, 8):
+        return "Summer"
+    elif date.month in (9, 10):
+        return "Fall"
+    else:
+        return "Early Year"
 
-# Print the range of dates
-print("Range of Dates:")
-print("Min Date:", min_date)
-print("Max Date:", max_date)
+# Apply the get_season function to the "released" column and create the "season" column
+games["season"] = games["released"].apply(get_season)
+
+# Print the first 5 rows with the new "season" column
+print(games.head(5))
+print("Shape:", games.shape)
+
+# Drop "metacritic" score
+games.drop('released', axis=1, inplace=True)
 
 print(games.columns)
+
+# Save the modified DataFrame to a new CSV file
+games.to_csv("modified_games.csv", index=False)
+
+print(games.columns)
+
+# Drop "metacritic" score
+games.drop('metacritic', axis=1, inplace=True)
+# Remove the specified columns
+columns_to_remove = ['id', 'background_image']
+games.drop(columns_to_remove, axis=1, inplace=True)
+
 ```
 
 ```{python}
