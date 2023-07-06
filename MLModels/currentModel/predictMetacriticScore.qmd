@@ -1,6 +1,6 @@
 ---
-title: "Predicting Future Sales"
-description: ""
+title: "Predicting Metacritic Categories"
+description: "WORK IN PROGRESS, WE TO IDENTIFY FEATURES"
 author: "Brian Cervantes Alvarez"
 date: "07-03-2023"
 format:
@@ -12,30 +12,80 @@ format:
 execute: 
   warning: false
   message: false
-categories: [Python, Machine Learning]
+categories: [Python, Machine Learning, NLP]
 jupyter: python3
 ---
 
-# Load Libraries
+
+# Comments for Jack
+
+Jack, I'm sharing the random forest model with you that predicts 5 categories of metacritic scores. I haven't performed feature selection/dimensionality reduction yet. We should reduce the number of features and select the most important ones. If possible, consider applying PCA. Keep in mind our goal of identifying the features that strongly predict metacritic scores. It would be fantastic if you can find the top 10 features that greatly influence the model. Additionally, if you have extra time, please work on further improving the model. Increase the cross-fold validation to 10 (but wait until the very end as it takes about 7 minutes with 5 folds). Explore enhancing the hyperparameters and consider adding more features. The NLP method I converted from R has ample room for feature engineering, so go for it. If we can achieve a Kappa of .90 and explain which features are responsible for that, we will be in a good position.
+
+
+
+## Libaries for data manipulation, analysis, visualization, natural language processing, and machine learning using various libraries.
 ```{python}
+# Importing the pandas library for data manipulation and analysis
 import pandas as pd
+
+# Importing the NumPy library for numerical operations
 import numpy as np
+
+# Importing the seaborn library for data visualization
 import seaborn as sns
+
+# Importing the matplotlib library for creating plots and charts
 import matplotlib.pyplot as plt
-import tensorflow as tf
-import xgboost as xgb
+
+# Importing the nltk library for natural language processing tasks
+import nltk
+
+# Importing the re module for regular expressions
+import re
+
+# Importing stopwords from the nltk.corpus module
+from nltk.corpus import stopwords
+
+# Importing the WordNetLemmatizer from the nltk.stem module
+from nltk.stem import WordNetLemmatizer
+
+# Importing Counter from the collections module
+from collections import Counter
+
+# Importing train_test_split for splitting the data into training and testing sets
 from sklearn.model_selection import train_test_split
+
+# Importing the MinMaxScaler for feature scaling
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from sklearn.cluster import KMeans
-from kmodes.kmodes import KModes
+
+# Importing the RandomForestClassifier from the sklearn.ensemble module
+from sklearn.ensemble import RandomForestClassifier
+
+# Importing evaluation metrics from the sklearn.metrics module
+from sklearn.metrics import (
+    cohen_kappa_score,
+    roc_auc_score,
+    accuracy_score,
+    precision_score,
+    recall_score,
+    confusion_matrix,
+)
+
+# Importing GridSearchCV from the sklearn.model_selection module
+from sklearn.model_selection import GridSearchCV
 ```
 
 ## Data Preprocessing and Analysis
 
 These operations demonstrate common data preprocessing tasks such as reading data, removing columns, handling missing values, creating new columns, converting data types, and performing basic analysis on the data.
+
+1. The CSV file "gamesMetacritic.csv" is read into a DataFrame called games, and the shape of the DataFrame is printed.
+
+2. Columns with missing values are identified and stored in the columns_with_missing_values list.
+
+3. The number of missing values is printed for each column with missing values.
+
+4. The missing values are dropped from the DataFrame using the `drop
 
 ```{python}
 # Read the CSV file into a DataFrame
@@ -63,7 +113,12 @@ rating_ranges = [(0, 59, "Poor"),
                  (90, 100, "Masterpiece")]
 
 # Create a new column for the categorical labels
-games["metacritic_category"] = pd.cut(games["metacritic"], bins=[r[0] for r in rating_ranges] + [101], labels=[r[2] for r in rating_ranges], right=False)
+games["metacritic_category"] = pd.cut(
+    games["metacritic"],
+    bins=[r[0] for r in rating_ranges] + [101],
+    labels=[r[2] for r in rating_ranges],
+    right=False
+)
 
 # Convert "released" column to datetime type
 games["released"] = pd.to_datetime(games["released"])
@@ -88,7 +143,7 @@ games["season"] = games["released"].apply(get_season)
 print(games.head(5))
 print("Shape:", games.shape)
 
-# Drop "metacritic" score
+# Drop "released" column
 games.drop('released', axis=1, inplace=True)
 
 print(games.columns)
@@ -98,13 +153,25 @@ games.to_csv("modified_games.csv", index=False)
 
 print(games.columns)
 
-# Drop "metacritic" score
-games.drop('metacritic', axis=1, inplace=True)
-# Remove the specified columns
-columns_to_remove = ['id', 'background_image']
-games.drop(columns_to_remove, axis=1, inplace=True)
+# Define the playtime ranges and corresponding categories
+playtime_ranges = [(0, 10), (11, 50), (51, 100), (101, float('inf'))]
+playtime_categories = ['Beginner', 'Intermediate', 'Advanced', 'Expert']
 
+# Create a new column with categorical values based on playtime
+games['playtime_category'] = pd.cut(
+    games['playtime'],
+    bins=[range[0] - 1 for range in playtime_ranges] + [playtime_ranges[-1][1]],
+    labels=playtime_categories
+)
+
+# Remove the specified columns
+columns_to_remove = ['id', 'background_image', 'metacritic', 'name', 'playtime', 'platform_name']
+games.drop(columns_to_remove, axis=1, inplace=True)
 ```
+
+## Balanced Dataset Creation: Random Sampling of Genre-Based Samples
+
+The code block generates a balanced dataset by randomly selecting 1000 samples from each genre in the games DataFrame. It first calculates the total number of rows per genre and then iterates over each genre, filtering the DataFrame accordingly. Within each iteration, 1000 samples are randomly selected and appended to the random_samples DataFrame. Finally, the resulting dataset is assigned to the variable modelDs. This process ensures an equal representation of each genre in the final dataset, making it suitable for subsequent analysis or modeling tasks.
 
 ```{python}
 # Calculate the total number of rows per genre
@@ -132,47 +199,183 @@ for genre in games['genre'].unique():
 print(random_samples)
 print(random_samples.head(5))
 
+modelDs = random_samples
 
-model_data = random_samples
+```
+
+## Feature Engineering
+
+The code block performs the conversion of specified categorical columns into dummy variables in the modelDs DataFrame. The columns to be converted are specified in the columns_to_dummy list. Using the pd.get_dummies() function, dummy variables are created for each unique value in these columns, with column names prefixed by the original column names. The drop_first=True parameter ensures that the first dummy variable for each column is dropped to avoid multicollinearity. The resulting dummy variables are then concatenated with the original modelDs DataFrame using pd.concat(). Finally, the original categorical columns are dropped from the modelDs DataFrame using drop() with the axis=1 parameter. This process transforms categorical variables into numerical representations, making them suitable for machine learning algorithms that require numeric input.
+
+```{python}
+# Convert specified columns into dummy variables
+columns_to_dummy = ['esrb_rating_name', 'genre', 'season', 'playtime_category']
+dummy_cols = pd.get_dummies(modelDs[columns_to_dummy], prefix=columns_to_dummy, drop_first=True)
+modelDs = pd.concat([modelDs, dummy_cols], axis=1)
+modelDs.drop(columns_to_dummy, axis=1, inplace=True)
+modelDs
+
+```
+
+## NLP Engineering
+
+The code block contains a function and several operations to preprocess the 'description' column in the modelDs DataFrame. The preprocess_description() function converts the text to lowercase, removes non-alphabetic characters and strings shorter than 3 characters, and eliminates stop words using the NLTK library. The function is applied to the 'description' column using the apply() method, and the preprocessed descriptions are stored in a new column called 'processed_description'. The preprocessed descriptions are then transformed into dummy variables using pd.get_dummies(), and the resulting dummy variables are concatenated with the original DataFrame. The original 'description' and 'processed_description' columns are dropped. Next, the preprocessed descriptions are tokenized into individual words, and lemmatization is performed using the WordNetLemmatizer from NLTK. The code counts the occurrences of each word, retrieves the most common words, and prints them. Additionally, the code retrieves the 25 unique words that occur rarely and prints them. This preprocessing and word analysis is useful for text-based analysis or natural language processing tasks.
+
+
+```{python}
+# Function to preprocess the description column
+def preprocess_description(description):
+    # Convert to lowercase
+    description = description.lower()
+    
+    # Remove non-alphabetic characters and strings shorter than 3 characters
+    description = re.sub(r'[^a-z ]', '', description)
+    description = ' '.join(word for word in description.split() if len(word) > 2)
+    
+    # Remove stop words
+    stop_words = set(stopwords.words('english'))
+    description = ' '.join(word for word in description.split() if word not in stop_words)
+    
+    return description
+
+# Apply preprocessing to the description column
+modelDs['processed_description'] = modelDs['description'].apply(preprocess_description)
+
+# Convert the processed description into dummy variables
+dummy_cols = pd.get_dummies(modelDs['processed_description'], prefix='description', drop_first=True)
+modelDs = pd.concat([modelDs, dummy_cols], axis=1)
+
+# Drop the original description and processed_description columns
+modelDs.drop(['description', 'processed_description'], axis=1, inplace=True)
+
+# Tokenize the preprocessed descriptions into individual words and perform lemmatization
+all_words = ' '.join(modelDs.columns.tolist())
+word_tokens = all_words.split()
+
+lemmatizer = WordNetLemmatizer()
+lemmatized_words = [lemmatizer.lemmatize(word) for word in word_tokens]
+
+# Count the occurrences of each word
+word_counts = Counter(lemmatized_words)
+
+# Retrieve the most common words
+most_common_words = word_counts.most_common(25)  # Change the number 25 to get a different number of most common words
+
+print("Most common words:")
+for word, count in most_common_words:
+    print(f"{word}: {count}")
+
+# Retrieve the 25 unique words that occur rarely
+rare_words = [word for word, count in word_counts.items() if count == 1][:25]
+
+print("Rarely occurring words:")
+for word in rare_words:
+    print(word)
+```
+
+## Random Forest Classifier with Hyperparameter Tuning and Evaluation
+
+The code block involves the following steps for building and evaluating a model:
+
+1. The data is split into training and testing sets using the `train_test_split()` function. The features (input variables) are stored in `X`, and the target variable is stored in `y`.
+2. A parameter grid is defined to specify different combinations of hyperparameters for tuning. The hyperparameters considered are the number of trees in the forest (`n_estimators`), the maximum depth of each tree (`max_depth`), and the minimum number of samples required to split an internal node (`min_samples_split`).
+3. A random forest classifier is created using `RandomForestClassifier()`.
+4. Grid search with cross-validation is performed using `GridSearchCV()` to find the best combination of hyperparameters. The grid search is conducted on the training set.
+5. The best hyperparameters are retrieved using `best_params_`.
+6. The best model is obtained using `best_estimator_` from the grid search results.
+7. Predictions are made on the testing set using the best model.
+8. Class probabilities are calculated using `predict_proba()`.
+9. The ROC AUC score is calculated using `roc_auc_score()`.
+10. The Kappa coefficient is calculated using `cohen_kappa_score()`.
+11. Accuracy is calculated using `accuracy_score()`.
+12. Precision is calculated using `precision_score()`.
+13. Recall is calculated using `recall_score()`.
+14. The confusion matrix is calculated using `confusion_matrix()`.
+
+These steps involve training and evaluating a random forest classifier with hyperparameter tuning using grid search. The resulting model's performance is assessed using various evaluation metrics such as ROC AUC score, Kappa coefficient, accuracy, precision, recall, and the confusion matrix.
+
+
+```{python}
+# Split the data into training and testing sets
+X = modelDs.drop('metacritic_category', axis=1)  # Features (input variables)
+y = modelDs['metacritic_category']  # Target variable
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=154)
+
+# Define the parameter grid for hyperparameter tuning
+param_grid = {
+    'n_estimators': [100, 200, 300],  # Number of trees in the forest
+    'max_depth': [None, 5, 10],  # Maximum depth of each tree
+    'min_samples_split': [2, 5, 10]  # Minimum number of samples required to split an internal node
+}
+
+# Create a random forest classifier
+classifier = RandomForestClassifier()
+
+# Perform grid search with cross-validation
+grid_search = GridSearchCV(classifier, param_grid, cv=5)
+grid_search.fit(X_train, y_train)
+
+# Get the best hyperparameters
+best_params = grid_search.best_params_
+print("Best Hyperparameters:")
+print(best_params)
+
+# Use the best model for predictions
+best_classifier = grid_search.best_estimator_
+y_pred = best_classifier.predict(X_test)
+
+# Make predictions with class probabilities
+y_pred_prob = best_classifier.predict_proba(X_test)
+
+# Calculate ROC AUC score
+roc_auc = roc_auc_score(y_test, y_pred_prob, multi_class='ovr')
+print(f"ROC AUC: {roc_auc}")
+
+# Calculate Kappa coefficient
+kappa = cohen_kappa_score(y_test, y_pred)
+print(f"Kappa: {kappa}")
+
+# Calculate accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy}")
+
+# Calculate precision
+precision = precision_score(y_test, y_pred, average='weighted')
+print(f"Precision: {precision}")
+
+# Calculate recall
+recall = recall_score(y_test, y_pred, average='weighted')
+print(f"Recall: {recall}")
+
+# Calculate confusion matrix
+confusion = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(confusion)
+
 
 ```
 
 
+### Hyperparameter Tuning (DO NOT RUN THIS ANYMORE)
 ```{python}
-gamesDs.columns
-```
+# Define a parameter grid for hyperparameter tuning
+param_grid = {
+    'n_estimators': [100, 200, 300],  # Number of trees in the forest
+    'max_depth': [None, 5, 10],  # Maximum depth of each tree
+    'min_samples_split': [2, 5, 10]  # Minimum number of samples required to split an internal node
+}
 
+# Perform grid search for hyperparameter tuning
+grid_search = GridSearchCV(classifier, param_grid, cv=5)
+grid_search.fit(X_train, y_train)
 
+# Get the best hyperparameters
+best_params = grid_search.best_params_
+print("Best Hyperparameters:")
+print(best_params)
 
-### Pairplot Visualization
-
-This code block demonstrates the process of selecting specific columns, converting data types, and using Seaborn and Matplotlib libraries to create a pairplot visualization for analyzing the relationships between different variables in the data.
-
-```{python}
-
-```
-
-### Scatter Plot Comparisons
-
- This code chunk shows a visual analysis of the relationships between the "metacritic" ratings and various features, providing insights into how different factors might impact the overall rating.
-```{python}
-
-
-```
-
-### K-means Clustering and Scatter Plot Matrix
-
-This allows for the exploration and analysis of patterns and relationships within the data, helping to identify similarities or differences among different clusters.
-
-```{python}
-
-```
-
-### K-modes Clustering and Cluster Distribution Visualization
-
-K-modes clustering allows for visualizing the distribution of clusters for each categorical feature. It provides insights into how the categorical variables are grouped into different clusters and allows for the exploration and analysis of patterns and relationships within the data.
-
-```{python}
-
-
+# Use the best model for predictions
+best_classifier = grid_search.best_estimator_
+y_pred_best = best_classifier.predict(X_test)
 ```
