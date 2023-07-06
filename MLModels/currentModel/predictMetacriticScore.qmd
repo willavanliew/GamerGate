@@ -38,8 +38,6 @@ from kmodes.kmodes import KModes
 These operations demonstrate common data preprocessing tasks such as reading data, removing columns, handling missing values, creating new columns, converting data types, and performing basic analysis on the data.
 
 ```{python}
-import pandas as pd
-
 # Read the CSV file into a DataFrame
 games = pd.read_csv("gamesMetacritic.csv")
 print(games.shape)
@@ -135,7 +133,7 @@ print(random_samples)
 print(random_samples.head(5))
 
 
-gamesDs = random_samples
+model_data = random_samples
 
 ```
 
