@@ -6,16 +6,23 @@ output: html_notebook
 ```{r setup, include=FALSE, echo=FALSE}
 library(tidyverse)
 library(skimr)
-library(lubridate) 
+library(lubridate)
+library(DataExplorer)
 ```
 
 ```{r load data}
 critic_review = read_csv("master.csv")
-critic_review
+head(critic_review)
 ```
 
-```{r}
-
+```{r General Info}
+summary(critic_review)
+skim(critic_review)
+glimpse(critic_review)
+dim(critic_review)
+```
+```{r Create General Report}
+DataExplorer::create_report(critic_review)
 ```
 
 ```{r Release Console vs ESRB & Review Score}
