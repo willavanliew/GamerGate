@@ -14,6 +14,11 @@ library(inspectdf)
 
 ```{r load data}
 critic_review = read_csv("master.csv")
+
+# Need to order the seasons
+# Need to combine console types into larger groups, but keep original data
+# Create some means data for metacritic and playtime
+
 head(critic_review)
 ```
 
@@ -41,7 +46,47 @@ critic_review %>%
   ggplot(aes(x = platform_name, y = metacritic, fill = esrb_rating_name)) +
   geom_boxplot() +
   labs(title = "Review Scores by Console and ESRB Ratings", x = "Console Type", y = "Review Scores", fill = "ESRB Ratings") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set2")
+```
+
+```{r Genres by Review Scores & ESRB Ratings}
+critic_review %>% 
+  ggplot(aes(x = genre, y = metacritic, fill = esrb_rating_name)) +
+  geom_boxplot() +
+  labs(title = "Review Scores by Genre and ESRB Ratings", x = "Genre", y = "Review Scores", fill = "ESRB Ratings") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "OrRd")
+```
+```{r Season by Review Scores & Genre}
+critic_review %>% 
+  ggplot(aes(x = season, y = metacritic, fill = genre)) +
+  geom_boxplot() +
+  labs(title = "Review Scores by Genre and ESRB Ratings", x = "Season", y = "Review Scores", fill = "Genre") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set3")
+```
+
+```{r Playtime by Console Type}
+critic_review %>% 
+  ggplot(aes(x = platform_name, y = playtime)) +
+  geom_boxplot() +
+  labs(title = "Playtime by Console and ESRB Ratings", x = "Console Type", y = "Playtime") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set2")
+```
+
+```{r Playtime by Genre}
+critic_review %>% 
+  ggplot(aes(x = genre, y = playtime, fill = esrb_rating_name)) +
+  geom_boxplot() +
+  labs(title = "Playtime by Genre and ESRB Ratings", x = "Genre", y = "Playtime", fill = "ESRB Ratings") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "OrRd")
+```
+
+```{r}
+
 ```
 
 ```{r}
