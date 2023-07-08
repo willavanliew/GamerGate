@@ -1,13 +1,5 @@
-library(tidyverse)
-library(colorspace)
-library(RColorBrewer)
-library(htmltools)
-library(plotly)
-library(ggpubr)
-library(thematic)
-library(shinythemes)
-library(gt)
-library(stringr)
+if(!require("pacman")) {install.packages("pacman");library(pacman)}
+p_load(tidyverse, colorspace, RColorBrewer,htmltools,plotly,ggpubr,thematic,shinythemes,gt,stringr)
 
 # Reading in datasets
 games_old <- read_csv("cleaned_games.csv")
