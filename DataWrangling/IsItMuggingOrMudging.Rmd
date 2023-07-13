@@ -1,0 +1,73 @@
+---
+ title: "Data Mugging"
+author: "Willa Van Liew"
+date: "2023-07-09"
+output: html_document
+---
+```{r}
+
+```
+
+### Publishers Cleaning 
+```{r}
+games <- games %>%
+  mutate(pub_Nintendo = str_detect(publishers, "Nintendo"),
+         pub_Ubisoft = str_detect(publishers, "Ubisoft"),
+         pub_Sony = str_detect(publishers, "Sony"),
+         pub_Activision = str_detect(publishers, "Activision"),
+         pub_EA = str_detect(publishers, "EA"),
+         pub_namco = str_detect(publishers, "Namco"),
+         pub_konami = str_detect(publishers, "Konami"),
+         pub_koei = str_detect(publishers, "Koei"),
+         pub_sega = str_detect(publishers, "Sega"),
+         pub_capcom = str_detect(publishers, "Capcom"),
+         pub_rockstar = str_detect(publishers, "Rockstar"),
+         pub_THQ = str_detect(publishers, "THQ"),
+         pub_2K = str_detect(publishers, "2K"),
+         pub_D3 = str_detect(publishers, "D3"),
+         pub_vivendi = str_detect(publishers, "Vivendi"),
+         pub_majesco = str_detect(publishers, "Majesco"),
+         pub_microsoft = str_detect(publishers, "Microsoft"),
+         pub_SquareEnix = str_detect(publishers, "SquareEnix"),
+         pub_505 = str_detect(publishers, "505 Games"),
+         pub_Atari = str_detect(publishers, "Atari"),
+         pub_Spike = str_detect(publishers, "Spike"),
+         pub_RisingStar = str_detect(publishers, "Rising Star"),
+         pub_Midway = str_detect(publishers, "Midway"),
+         pub_Spike = str_detect(publishers, "LucasArts"),
+         pub_Eidos = str_detect(publishers, "Eidos"),
+         pub_WarnerBros = str_detect(publishers, "Warner Bros"),
+         pub_Atlus = str_detect(publishers, "Atlus"),
+         pub_Codemasters = str_detect(publishers, "Codemasters"),
+         pub_Disney = str_detect(publishers, "Disney"),
+        pub_count = str_count(publishers, ",") + 1,
+        pub_other = publishers %in% c("Marvelous","The Adventure Company", "Conspiracy Entertainment","ZOO Digital","Zoo", "Bethesda",
+                                             "Crave", "Gameloft","Aksys","Brash","Red Mile Entertainment","Oxygen Games","Sierra Entertainment",
+                                             "Noise Factory","Idea Factory","Digital Entertainment Pool", "System 3","Sandlot Games","Destineer",
+                                            "Funbox Media", "Virgin Play","V.2 Play","RTL Games", "Nippon Ichi Software", "MumboJumbo", "SNK",
+                                            "Valve", "Disney Interactive Studios", "TopWare Interactive","PlayFirst", "Mindscape", "MTV Games",
+                                            "Idigicon", "Nihon Falcom", "Deep Silver", "Gamecock", "GameCock", "Xplosiv","Banpresto", "Sting",
+                                            "Success Corporation", "Interactive Brains", "SCEI", "NIS America", "The Game Factory", 
+                                            "Arc System Works","Atlas","Natsume", "Hudson Soft", "SouthPeak", "Xseed Games", "SNK Playmore", 
+                                            "Now Production", "Take-Two Interactive", "Mastiff", "Empire Interactive", "Taito", "Bandai",
+                                            "Buena Vista", "Tecmo", "Ignition", "Agetec", "FromSoftware"))
+         )
+
+```
+
+```{r}
+convertToBinary <- function(data, columns) {
+  # Subset the data with the specified columns
+  subset_data <- data[, columns]
+  
+  # Convert NA values to 0 and non-NA values to 1
+  binary_data <- ifelse(is.na(subset_data), 0, 1)
+  
+  # Replace the subset columns in the original data with the binary values
+  data[, columns] <- binary_data
+  
+  # Return the modified data set
+  return(data)
+}
+```
+
