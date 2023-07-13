@@ -88,6 +88,18 @@ These operations demonstrate common data preprocessing tasks such as reading dat
 4. The missing values are dropped from the DataFrame using the `drop
 
 ```{python}
+# INDICATOR Variables
+# ADD FEATURE: Single Platform, Multi-Platform, etc.
+# ADD FEATURE: playtime (ADD MORE FEATURES)
+# ADD FEATURE: platform, publisher, developer counts/mean/median
+# INCLUDE Platform because it can add variation.
+# INCLUDE Year because it absorbs the metacritic variation by year-to-year
+# ADD FEATURE: A trend line variable for year over year, Metacritic_YOY
+# Look into adding a feature: Interactions: genre by year, platform vs genre
+# Look into ratios given word actions: active/passive aggressive/simple
+# Look one player vs multiplayer
+
+
 # Read the CSV file into a DataFrame
 games = pd.read_csv("gamesMetacritic.csv")
 print(games.shape)
@@ -105,12 +117,12 @@ for column in columns_with_missing_values:
 games.dropna(inplace=True)
 
 # Define rating ranges and corresponding labels
-rating_ranges = [(0, 59, "Poor"),
-                 (60, 69, "Mixed"),
-                 (70, 79, "Good"),
-                 (80, 84, "Great"),
-                 (85, 89, "Excellent"),
-                 (90, 100, "Masterpiece")]
+rating_ranges = [(0, 67, "Poor"),
+                 (68, 72, "Mixed"),
+                 (73, 76, "Good"),
+                 (77, 80, "Great"),
+                 (81, 84, "Excellent"),
+                 (85, 100, "Masterpiece")]
 
 # Create a new column for the categorical labels
 games["metacritic_category"] = pd.cut(
@@ -131,7 +143,7 @@ def get_season(date):
         return "Spring"
     elif date.month in (6, 7, 8):
         return "Summer"
-    elif date.month in (9, 10):
+    elif date.month in (9, 10, 11):
         return "Fall"
     else:
         return "Early Year"
@@ -222,6 +234,7 @@ modelDs
 The code block contains a function and several operations to preprocess the 'description' column in the modelDs DataFrame. The preprocess_description() function converts the text to lowercase, removes non-alphabetic characters and strings shorter than 3 characters, and eliminates stop words using the NLTK library. The function is applied to the 'description' column using the apply() method, and the preprocessed descriptions are stored in a new column called 'processed_description'. The preprocessed descriptions are then transformed into dummy variables using pd.get_dummies(), and the resulting dummy variables are concatenated with the original DataFrame. The original 'description' and 'processed_description' columns are dropped. Next, the preprocessed descriptions are tokenized into individual words, and lemmatization is performed using the WordNetLemmatizer from NLTK. The code counts the occurrences of each word, retrieves the most common words, and prints them. Additionally, the code retrieves the 25 unique words that occur rarely and prints them. This preprocessing and word analysis is useful for text-based analysis or natural language processing tasks.
 
 
+## THIS RUNS DUMMY COLUMNS FOR ALL THE WORDS THAT WERE LEMMATIZED (RUN EVERYTHING ABOVE BEFORE RUNNING THIS ONE OR THE SECOND VERSION BELOW)
 ```{python}
 # Function to preprocess the description column
 def preprocess_description(description):
@@ -273,6 +286,67 @@ for word in rare_words:
     print(word)
 ```
 
+## RUN THIS TO SELECT WORDS FOR DUMMY COLUMNS (REMEMBER)
+
+```{python}
+
+# Function to preprocess the description column
+def preprocess_description(description):
+    # Convert to lowercase
+    description = description.lower()
+
+    # Remove non-alphabetic characters and strings shorter than 3 characters
+    description = re.sub(r'[^a-z ]', '', description)
+    description = ' '.join(word for word in description.split() if len(word) > 2)
+
+    # Remove stop words
+    stop_words = set(stopwords.words('english'))
+    description = ' '.join(word for word in description.split() if word not in stop_words)
+
+    return description
+
+# Apply preprocessing to the description column
+modelDs['processed_description'] = modelDs['description'].apply(preprocess_description)
+
+# Define the word columns you want to include
+word_columns = ['enemy', 'battle', 'feature', 'unique', 'different', 'gameplay']
+
+# Convert the selected processed description words into dummy variables
+dummy_cols = pd.get_dummies(modelDs['processed_description'].apply(lambda x: ' '.join(set(x.split()) & set(word_columns))), prefix='description', drop_first=True)
+modelDs = pd.concat([modelDs, dummy_cols], axis=1)
+
+# Drop the original description and processed_description columns
+modelDs.drop(['description', 'processed_description'], axis=1, inplace=True)
+
+# Tokenize the preprocessed descriptions into individual words and perform lemmatization
+all_words = ' '.join(modelDs.columns.tolist())
+word_tokens = all_words.split()
+
+lemmatizer = WordNetLemmatizer()
+lemmatized_words = [lemmatizer.lemmatize(word) for word in word_tokens]
+
+# Count the occurrences of each word
+word_counts = Counter(lemmatized_words)
+
+# Retrieve the most common words
+most_common_words = word_counts.most_common(25)  # Change the number 25 to get a different number of most common words
+
+print("Most common words:")
+for word, count in most_common_words:
+    print(f"{word}: {count}")
+
+# Retrieve the 25 unique words that occur rarely
+rare_words = [word for word, count in word_counts.items() if count == 1][:25]
+
+print("Rarely occurring words:")
+for word in rare_words:
+    print(word)
+
+
+```
+
+
+
 ## Random Forest Classifier with Hyperparameter Tuning and Evaluation
 
 The code block involves the following steps for building and evaluating a model:
@@ -304,29 +378,22 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 # Define the parameter grid for hyperparameter tuning
 param_grid = {
-    'n_estimators': [100, 200, 300],  # Number of trees in the forest
-    'max_depth': [None, 5, 10],  # Maximum depth of each tree
-    'min_samples_split': [2, 5, 10]  # Minimum number of samples required to split an internal node
+    'n_estimators': 300,  # Number of trees in the forest
+    'max_depth': None,  # Maximum depth of each tree
+    'min_samples_split': 5  # Minimum number of samples required to split an internal node
 }
 
-# Create a random forest classifier
-classifier = RandomForestClassifier()
+# Create a random forest classifier with specific hyperparameters
+classifier = RandomForestClassifier(**param_grid)
 
-# Perform grid search with cross-validation
-grid_search = GridSearchCV(classifier, param_grid, cv=5)
-grid_search.fit(X_train, y_train)
+# Fit the classifier to the training data
+classifier.fit(X_train, y_train)
 
-# Get the best hyperparameters
-best_params = grid_search.best_params_
-print("Best Hyperparameters:")
-print(best_params)
-
-# Use the best model for predictions
-best_classifier = grid_search.best_estimator_
-y_pred = best_classifier.predict(X_test)
+# Use the trained classifier for predictions
+y_pred = classifier.predict(X_test)
 
 # Make predictions with class probabilities
-y_pred_prob = best_classifier.predict_proba(X_test)
+y_pred_prob = classifier.predict_proba(X_test)
 
 # Calculate ROC AUC score
 roc_auc = roc_auc_score(y_test, y_pred_prob, multi_class='ovr')
@@ -356,6 +423,30 @@ print(confusion)
 
 ```
 
+# Importance Function
+```{python}
+# Get feature importances
+importances = best_classifier.feature_importances_
+
+# Get feature names
+feature_names = X.columns
+
+# Sort feature importances in descending order
+sorted_indices = importances.argsort()[::-1]
+sorted_importances = importances[sorted_indices]
+sorted_feature_names = feature_names[sorted_indices]
+
+# Plot feature importances
+plt.figure(figsize=(10, 6))
+plt.bar(range(len(sorted_importances)), sorted_importances, tick_label=sorted_feature_names)
+plt.xticks(rotation=90)
+plt.xlabel('Feature')
+plt.ylabel('Importance')
+plt.title('Feature Importance')
+plt.tight_layout()
+plt.show()
+
+```
 
 ### Hyperparameter Tuning (DO NOT RUN THIS ANYMORE)
 ```{python}
