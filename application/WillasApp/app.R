@@ -1,13 +1,6 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+if(!require("pacman")) {install.packages("pacman");library(pacman)}
+p_load(tidyverse, colorspace, RColorBrewer,htmltools,plotly,ggpubr,thematic,shinythemes,shiny)
 
-library(shiny)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -18,11 +11,19 @@ ui <- fluidPage(
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
+          selectizeInput("games", "Choose up to 5 Games:", unique(games$name), 
+                         multiple = TRUE, 
+                         selected = "Grand",
+                         options = list(maxItems = 3))
+          selectInput("input", h3("Choose value"), 
+                      choices = list("Genre" = genre,
+                                     "Console Company" = cons_comp,
+                                     "Console Type" = platform_name,
+                                     "Metacritic Score" = metacritic_category,
+                                     "Publisher" = publisher,
+                                     "Developer" = developer,
+                                     "ESRB Rating" = esrb_rating_name), selected = genre),
+          
         ),
 
         # Show a plot of the generated distribution

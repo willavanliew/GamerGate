@@ -5,12 +5,16 @@ date: "2023-07-09"
 output: html_document
 ---
 ```{r}
-
+library(tidyverse)
+library(rio)
+library(fastDummies)
+games <- import("../MLModels/currentModel/Final.csv")
+unique(games$publishers)
 ```
 
 ### Publishers Cleaning 
 ```{r}
-games <- games %>%
+games %>%
   mutate(pub_Nintendo = str_detect(publishers, "Nintendo"),
          pub_Ubisoft = str_detect(publishers, "Ubisoft"),
          pub_Sony = str_detect(publishers, "Sony"),
@@ -54,6 +58,206 @@ games <- games %>%
          )
 
 ```
+```{r}
+distinct_games <- games %>% select(name, developers, publishers) %>% distinct()
+```
+
+```{r}
+games %>% group_by(publishers) %>% summarize(n=n()) %>% filter(n> 10)
+```
+
+```{r}
+developers <- distinct_games %>% group_by(developers) %>% summarize(n=n()) 
+developers %>% filter(n > 10)
+```
+```{r}
+games %>% group_by(developers) %>% summarize(n=n()) %>% filter(n> 10)
+```
+```{r}
+cleaned_developers <- developers %>%
+  mutate(dev_other = ifelse(n < 10, TRUE, FALSE),
+         dev_Atlus = str_detect(developers, "Atlus"),
+         dev_BioWare = str_detect(developers, "BioWare"),
+         dev_Blizzard = str_detect(developers, "Blizzard"),
+         dev_Activision = str_detect(developers, "Activision"),
+         dev_Ubisoft = str_detect(developers, "Ubisoft"),
+         dev_Rockstar = str_detect(developers, "Rockstar"),
+         dev_1C = str_detect(developers, "1C"),
+         dev_DICE = str_detect(developers, "DICE"),
+         dev_Capcom = str_detect(developers, "Capcom"),
+         dev_2K = str_detect(developers, "2K"),
+         dev_343Industries = str_detect(developers, "343 Industries"),
+         dev_CreativeAssembly = str_detect(developers, "Creative Assembly"),
+         dev_FromSoftware = str_detect(developers, "FromSoftware"),
+         dev_Vanguard = str_detect(developers, "Vanguard Games"),
+         dev_Arkane = str_detect(developers, "Arkane"),
+         dev_BandaiNamco = str_detect(developers, "Bandai Namco"),
+         dev_Bethesda = str_detect(developers, "Bethesda"),
+         dev_Bungie = str_detect(developers, "Bungie"),
+         dev_Crytek = str_detect(developers, "Crytek"),
+         dev_EA = str_detect(developers, "EA "),
+         dev_Nintendo = str_detect(developers, "Nintendo"),
+         dev_Ensemble = str_detect(developers, "Ensemble Studios"),
+         dev_EpicGames = str_detect(developers, "Epic Games"),
+         dev_Frontier = str_detect(developers, "Frontier Developments"),
+         dev_Feral = str_detect(developers, "Feral Interactive"),
+         dev_InfinityWard = str_detect(developers, "Infinity Ward"),
+         dev_Insomniac = str_detect(developers, "Insomniac Games"),
+         dev_JapanStudios = str_detect(developers, "Japan Studio"),
+         dev_Klei = str_detect(developers, "Klei Entertainment"),
+         dev_Konami = str_detect(developers, "Konami"),
+         dev_LucasArts = str_detect(developers, "LucasArts"),
+         dev_NaughtyDog = str_detect(developers, "Naughty Dog"),
+         dev_Namco = str_detect(developers, "Namco"),
+         dev_TellTale = str_detect(developers, "Telltale Games")) 
+```
+
+
+```{r}
+publishers <- distinct_games %>% group_by(publishers) %>% summarize(n=n()) 
+publishers %>% filter(n <10)
+```
+```{r}
+clean_pubs <- publishers %>%
+  mutate(pub_other = ifelse(n<10, TRUE, FALSE),
+         pub_Eidos = str_detect(publishers, "Eidos Interactive"),
+         pub_EA = str_detect(publishers, "EA Games"),
+         pub_DeepSilver = str_detect(publishers, "Deep Silver"),
+         pub_ElectronicArts = str_detect(publishers, "Electronic Arts"),
+         pub_Ubisoft = str_detect(publishers, "Ubisoft"),
+         pub_Sega = str_detect(publishers, "Sega"),
+         pub_Activision = str_detect(publishers, "Activision"),
+         pub_SquareEnix = str_detect(publishers, "Square Enix"),
+         pub_Devolver = str_detect(publishers, "Devolver Digital"),
+         pub_Capcom = str_detect(publishers, "Capcom"),
+         pub_Konami = str_detect(publishers, "Konami"),
+         pub_BandaiNamco = str_detect(publishers, "Bandai Namco"),
+         pub_Paradox = str_detect(publishers, "Paradox Interactive"),
+         pub_Nintendo = str_detect(publishers, "Nintendo"),
+         pub_Sony = str_detect(publishers, "Sony"),
+         pub_koei = str_detect(publishers, "Koei"),
+         pub_rockstar = str_detect(publishers, "Rockstar"),
+         pub_THQ = str_detect(publishers, "THQ"),
+         pub_2K = str_detect(publishers, "2K"),
+         pub_D3 = str_detect(publishers, "D3"),
+         pub_vivendi = str_detect(publishers, "Vivendi"),
+         pub_majesco = str_detect(publishers, "Majesco"),
+         pub_microsoft = str_detect(publishers, "Microsoft"),
+         pub_505 = str_detect(publishers, "505 Games"),
+         pub_Atari = str_detect(publishers, "Atari"),
+         pub_Spike = str_detect(publishers, "Spike"),
+         pub_RisingStar = str_detect(publishers, "Rising Star"),
+         pub_Midway = str_detect(publishers, "Midway"),
+         pub_Spike = str_detect(publishers, "LucasArts"),
+         pub_WarnerBros = str_detect(publishers, "Warner Bros"),
+         pub_Atlus = str_detect(publishers, "Atlus"),
+         pub_Codemasters = str_detect(publishers, "Codemasters"),
+         pub_Disney = str_detect(publishers, "Disney"),
+         pub_Blizzard = str_detect(publishers, "Blizzard"),
+         pub_Bethesda = str_detect(publishers, "Bethesda"),
+         pub_Curve = str_detect(publishers, "Curve Digital"),
+         pub_1C = str_detect(publishers, "1C"))
+
+clean_pubs[ rowSums(clean_pubs[3:39]) == 0,]
+
+
+```
+
+         
+Computer Entertainment = 72 
+Blank = 68
+Studios = 30
+Game Studios = 29
+```{r}
+publishers %>%
+  mutate(pub_other = ifelse(n < 10, TRUE, FALSE),
+         pub_Atlus = str_detect(publishers, "Atlus"),
+         pub_BioWare = str_detect(publishers, "BioWare"),
+         
+         
+         
+         pub_Rockstar = str_detect(publishers, "Rockstar"),
+         
+         pub_DICE = str_detect(publishers, "DICE"),
+         
+         pub_2K = str_detect(publishers, "2K"),
+         pub_343Industries = str_detect(publishers, "343 Industries"),
+         pub_CreativeAssembly = str_detect(publishers, "Creative Assembly"),
+         pub_FromSoftware = str_detect(publishers, "FromSoftware"),
+         pub_Vanguard = str_detect(publishers, "Vanguard Games"),
+         pub_Arkane = str_detect(publishers, "Arkane"),
+         
+         
+         pub_Bungie = str_detect(publishers, "Bungie"),
+         pub_Crytek = str_detect(publishers, "Crytek"),
+         
+         pub_Nintendo = str_detect(publishers, "Nintendo"),
+         pub_Ensemble = str_detect(publishers, "Ensemble Studios"),
+         pub_EpicGames = str_detect(publishers, "Epic Games"),
+         pub_Frontier = str_detect(publishers, "Frontier Developments"),
+         pub_Feral = str_detect(publishers, "Feral Interactive"),
+         pub_InfinityWard = str_detect(publishers, "Infinity Ward"),
+         pub_Insomniac = str_detect(publishers, "Insomniac Games"),
+         pub_JapanStudios = str_detect(publishers, "Japan Studio"),
+         pub_Klei = str_detect(publishers, "Klei Entertainment"),
+         
+         pub_LucasArts = str_detect(publishers, "LucasArts"),
+         pub_NaughtyDog = str_detect(publishers, "Naughty Dog"),
+         pub_Namco = str_detect(publishers, "Namco"),
+         pub_TellTale = str_detect(publishers, "Telltale Games")) 
+```
+```{r}
+export(developers, "/Users/willavanliew/Documents/DS-Masters/Capstone/developers.csv")
+```
+
+```{r}
+developers %>%
+  mutate(dev_Jaleco = str_detect(developers, "Jaleco"),
+         dev_CreativeAssembly = str_detect(developers, "Creative Assembly"),
+         dev_Frogwares = str_detect(developers, "Frogwares"),
+         dev_Spiders = str_detect(developers, "Spiders"),
+         dev_YoungHorses = str_detect(developers, "Young Horses"),
+         dev_Monolith = str_detect(developers, "Monolith Productions"),
+         dev_10tons = str_detect(developers, "10tons"),
+         dev_other = ifelse(n < 10, TRUE, FALSE),
+         developers = str_replace(developers, "Jaleco", ""),
+         developers = str_replace(developers, "Creative Assembly", ""))
+
+
+```
+
+```{r}
+games %>%
+  mutate(pub_Nintendo = str_detect(publishers, "Nintendo"),
+         pub_Ubisoft = str_detect(publishers, "Ubisoft"),
+         pub_Sony = str_detect(publishers, "Sony"),
+         pub_Activision = str_detect(publishers, "Activision"),
+         pub_EA = str_detect(publishers, "EA"),
+         pub_namco = str_detect(publishers, "Namco"),
+         pub_konami = str_detect(publishers, "Konami"),
+         pub_koei = str_detect(publishers, "Koei"),
+         pub_sega = str_detect(publishers, "Sega"),
+         pub_capcom = str_detect(publishers, "Capcom"),
+         pub_rockstar = str_detect(publishers, "Rockstar"),
+         pub_THQ = str_detect(publishers, "THQ"),
+         pub_2K = str_detect(publishers, "2K"),
+         pub_D3 = str_detect(publishers, "D3"),
+         pub_vivendi = str_detect(publishers, "Vivendi"),
+         pub_majesco = str_detect(publishers, "Majesco"),
+         pub_microsoft = str_detect(publishers, "Microsoft"),
+         pub_SquareEnix = str_detect(publishers, "SquareEnix"),
+         pub_505 = str_detect(publishers, "505 Games"),
+         pub_Atari = str_detect(publishers, "Atari"),
+         pub_Spike = str_detect(publishers, "Spike"),
+         pub_RisingStar = str_detect(publishers, "Rising Star"),
+         pub_Midway = str_detect(publishers, "Midway"),
+         pub_Spike = str_detect(publishers, "LucasArts"),
+         pub_Eidos = str_detect(publishers, "Eidos"),
+         pub_WarnerBros = str_detect(publishers, "Warner Bros"),
+         pub_Atlus = str_detect(publishers, "Atlus"),
+         pub_Codemasters = str_detect(publishers, "Codemasters"),
+         pub_Disney = str_detect(publishers, "Disney"))
+```
 
 ```{r}
 convertToBinary <- function(data, columns) {
@@ -69,5 +273,9 @@ convertToBinary <- function(data, columns) {
   # Return the modified data set
   return(data)
 }
+```
+```{r}
+
+dummy_cols(games, select_columns = platform_name)
 ```
 
