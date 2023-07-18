@@ -334,5 +334,12 @@ ds <- ds %>% pivot_wider(names_from = "gamemodes", values_from ="gamemodes")
 ds <- convertToBinary(ds, (140:142))
 export(ds, "~/Documents/DS-Masters/Capstone/GamerGate/DataVisualization/CurrentVisualization/Final_dev_pub.csv")
 
+ds <- ds %>% pivot_wider(names_from = "genre", values_from = "genre")
+
+ds<- convertToBinary(ds, c(142:147))
+
+ds <- ds %>% select(-description)
+
+export(ds, "~/Documents/DS-Masters/Capstone/GamerGate/application/Final_dev_pub.csv")
 ```
 
