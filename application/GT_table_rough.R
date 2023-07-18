@@ -28,9 +28,7 @@ games_gt <- games_gt %>%
   mutate_at(vars(6:length(games_gt)), ~ ifelse(. == TRUE, "Yes", "No"))
 
 # Remove the prefix from column names
-colnames(games_gt) <- sub("^(dev_|pub_)", "", colnames(games_gt))
-
-View(games_gt)
+# colnames(games_gt) <- sub("^(dev_|pub_)", "", colnames(games_gt))
 
 
 
@@ -59,7 +57,7 @@ games_table <- games_gt %>%
               columns=mode_index) %>%
   # add genre spanner
   tab_spanner("Genre",
-              columns=genre_index)
+              columns=genre_index) %>% 
   # color metacritic column based on values
   data_color(
     columns = metacritic,
@@ -76,7 +74,10 @@ games_table <- games_gt %>%
     metacritic = md("**Metacritic Rating**"),
     released = "Release Date",
     esrb_rating_name = "ESRB Rating",
-    background_image = "Background Image"
+    background_image = "Background Image") %>% 
+  # WHY DOESNT THIS WORK???
+  cols_label(
+    .fn = function(x) sub("^(dev_|pub_)", "", x)
   ) %>% 
   # Add images to GT table
     text_transform(
@@ -86,7 +87,7 @@ games_table <- games_gt %>%
            # Return an image of set dimensions
            web_image(
              url = x,
-             height = 40
+             height = 60
            )
          }
        ) %>%
@@ -98,3 +99,5 @@ games_table <- games_gt %>%
 
 # display the table
 games_table
+
+?cols_label
