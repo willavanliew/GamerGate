@@ -9,7 +9,8 @@ library(tidyverse)
 library(rio)
 library(fastDummies)
 games <- import("../MLModels/currentModel/Final.csv")
-unique(games$publishers)
+pub_dev <- import("../DataVisualization/CurrentVisualization/cleanPubDev.csv")
+pub_dev
 ```
 
 ### Publishers Cleaning 
@@ -59,7 +60,7 @@ games %>%
 
 ```
 ```{r}
-distinct_games <- games %>% select(name, developers, publishers) %>% distinct()
+distinct_games <- pub_dev %>% select(name, developers, publishers) %>% distinct()
 ```
 
 ```{r}
@@ -75,7 +76,7 @@ games %>% group_by(developers) %>% summarize(n=n()) %>% filter(n> 10)
 ```
 ```{r}
 cleaned_developers <- developers %>%
-  mutate(dev_other = ifelse(n < 10, TRUE, FALSE),
+  mutate(#dev_other = ifelse(n < 10, TRUE, FALSE),
          dev_Atlus = str_detect(developers, "Atlus"),
          dev_BioWare = str_detect(developers, "BioWare"),
          dev_Blizzard = str_detect(developers, "Blizzard"),
@@ -110,6 +111,13 @@ cleaned_developers <- developers %>%
          dev_NaughtyDog = str_detect(developers, "Naughty Dog"),
          dev_Namco = str_detect(developers, "Namco"),
          dev_TellTale = str_detect(developers, "Telltale Games")) 
+
+other_dev = cleaned_developers[ rowSums(cleaned_developers[3:36]) == 0,]
+
+cleaned_developers <- cleaned_developers %>%
+  mutate(dev_other = ifelse(developers %in% other_dev$developers, TRUE, FALSE)) %>%
+  select(-n)
+
 ```
 
 
@@ -119,7 +127,7 @@ publishers %>% filter(n <10)
 ```
 ```{r}
 clean_pubs <- publishers %>%
-  mutate(pub_other = ifelse(n<10, TRUE, FALSE),
+  mutate(#pub_other = ifelse(n<10, TRUE, FALSE),
          pub_Eidos = str_detect(publishers, "Eidos Interactive"),
          pub_EA = str_detect(publishers, "EA Games"),
          pub_DeepSilver = str_detect(publishers, "Deep Silver"),
@@ -156,11 +164,36 @@ clean_pubs <- publishers %>%
          pub_Blizzard = str_detect(publishers, "Blizzard"),
          pub_Bethesda = str_detect(publishers, "Bethesda"),
          pub_Curve = str_detect(publishers, "Curve Digital"),
-         pub_1C = str_detect(publishers, "1C"))
+         pub_1C = str_detect(publishers, "1C"),
+         pub_daedalic = str_detect(publishers, "Daedalic Entertainment"),
+         pub_FocusHome = str_detect(publishers, "Focus Home Interactive"),
+         dev_HumbleBumble = str_detect(publishers, "Humble Bumble"),
+         dev_Kalypso = str_detect(publishers, "Kalypso Media"),
+         pub_TellTale = str_detect(publishers, "Telltale Games"),
+         dev_Team17 = str_detect(publishers, "Team17"),
+         dev_Valve = str_detect(publishers, "Valve"),
+         dev_Xbox = str_detect(publishers, "Xbox Game Studios"),
+         dev_tinyBuild = str_detect(publishers, "tinyBuild"))
+clean_pubs 
+other_pubs <- clean_pubs[ rowSums(clean_pubs[3:47]) == 0,]
 
-clean_pubs[ rowSums(clean_pubs[3:39]) == 0,]
+clean_pubs <- clean_pubs %>% 
+  mutate(pub_other = ifelse(publishers %in% other_pubs$publishers, TRUE, FALSE),
+         pub_EA = ifelse(publishers == "EU: IDEA GamesNA: Meridian4 Bohemia Interactive", FALSE, pub_EA),
+         pub_other = ifelse(publishers == "EU: IDEA GamesNA: Meridian4 Bohemia Interactive", TRUE, pub_other)) %>%
+  select(-n)
 
+pub_dev1 <- pub_dev %>%
+  left_join(cleaned_developers, by = "developers")
 
+cleaned_pub_dev <- pub_dev1 %>%
+  left_join(clean_pubs, by = "publishers")
+
+export(cleaned_pub_dev, "~/Documents/DS-Masters/Capstone/GamerGate/DataVisualization/CurrentVisualization/Final_dev_pub.csv")
+setdiff(games, pub_dev)
+
+cleaned_pub_dev %>%
+  select(-c(released_metacritic, playtime, ))
 ```
 
          
@@ -204,7 +237,7 @@ publishers %>%
          pub_LucasArts = str_detect(publishers, "LucasArts"),
          pub_NaughtyDog = str_detect(publishers, "Naughty Dog"),
          pub_Namco = str_detect(publishers, "Namco"),
-         pub_TellTale = str_detect(publishers, "Telltale Games")) 
+         ) 
 ```
 ```{r}
 export(developers, "/Users/willavanliew/Documents/DS-Masters/Capstone/developers.csv")
@@ -274,8 +307,32 @@ convertToBinary <- function(data, columns) {
   return(data)
 }
 ```
-```{r}
 
-dummy_cols(games, select_columns = platform_name)
+```{r}
+convertToBinary <- function(data, columns) {
+  # Subset the data with the specified columns
+  subset_data <- data[, columns]
+  
+  # Convert NA values to 0 and non-NA values to 1
+  binary_data <- ifelse(is.na(subset_data), 0, 1)
+  
+  # Replace the subset columns in the original data with the binary values
+  data[, columns] <- binary_data
+  
+  # Return the modified data set
+  return(data)
+}
+```
+
+```{r}
+ds <- cleaned_pub_dev %>% pivot_wider(names_from = "platform_name", values_from = "platform_name")
+ds <- convertToBinary(ds, (95:140)) %>% distinct()
+
+
+ds <- ds %>% pivot_wider(names_from = "gamemodes", values_from ="gamemodes")
+
+ds <- convertToBinary(ds, (140:142))
+export(ds, "~/Documents/DS-Masters/Capstone/GamerGate/DataVisualization/CurrentVisualization/Final_dev_pub.csv")
+
 ```
 
