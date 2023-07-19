@@ -1,5 +1,5 @@
 if(!require("pacman")) {install.packages("pacman");library(pacman)}
-p_load(tidyverse, colorspace, RColorBrewer,htmltools,plotly,ggpubr,thematic,shinythemes,gt,stringr)
+p_load(tidyverse,colorspace,RColorBrewer,htmltools,plotly,ggpubr,thematic,shinythemes,gt,stringr)
 
 # Reading in datasets
 games <- read_csv("Final_dev_pub.csv")
@@ -7,6 +7,10 @@ games <- read_csv("Final_dev_pub.csv")
 # Create dataset for use in gt table
 games_gt <- games %>%
   select(-c(id, developers, publishers, genres, playtime))
+
+# sub dev_ for Developer:
+colnames(games_gt) <- sub("^(dev_)", "Developer: ", colnames(games_gt))
+colnames(games_gt) <- sub("^(pub_)", "Publisher: ", colnames(games_gt))
 
 
 # cons_comp as headers
@@ -27,11 +31,6 @@ genre_index <- 135:140
 games_gt <- games_gt %>%
   mutate_at(vars(6:length(games_gt)), ~ ifelse(. == TRUE, "Yes", "No"))
 
-# Remove the prefix from column names
-# colnames(games_gt) <- sub("^(dev_|pub_)", "", colnames(games_gt))
-
-
-
 # write to csv
 write_csv(games_gt, "gt.csv")
 
@@ -43,21 +42,6 @@ games_table <- games_gt %>%
     title = md("**GamerGate 2023 Games**"),
     subtitle = "Explore the data used to train the algorithm"
   ) %>% 
-  # add developer tab spanner
-  tab_spanner("Developers",
-              columns=dev_index) %>%
-  # add publisher tab spanner
-  tab_spanner("Publishers",
-              columns=pub_index) %>%
-  # add platform spanner
-  tab_spanner("Platforms",
-              columns=platform_index) %>%
-  # add gaming mode spanner
-  tab_spanner("Gaming Mode",
-              columns=mode_index) %>%
-  # add genre spanner
-  tab_spanner("Genre",
-              columns=genre_index) %>% 
   # color metacritic column based on values
   data_color(
     columns = metacritic,
@@ -75,10 +59,6 @@ games_table <- games_gt %>%
     released = "Release Date",
     esrb_rating_name = "ESRB Rating",
     background_image = "Background Image") %>% 
-  # WHY DOESNT THIS WORK???
-  cols_label(
-    .fn = function(x) sub("^(dev_|pub_)", "", x)
-  ) %>% 
   # Add images to GT table
     text_transform(
     # Apply a function to a column to return the game logo
@@ -91,6 +71,11 @@ games_table <- games_gt %>%
            )
          }
        ) %>%
+  cols_move(
+    `PlayStation 5`, `PlayStation 4`, `PlayStation 3`, `PS Vita`,
+    `PlayStation 2`, `PlayStation`, `Sony PSP`,
+    after = 
+  ) %>% 
   # add interactive search function to table
   opt_interactive(
     use_search = TRUE,
