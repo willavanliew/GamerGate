@@ -16,6 +16,14 @@ colnames(games_gt) <- sub("^(pub_)", "Publisher: ", colnames(games_gt))
 # cons_comp as headers
 # color t/f
 
+# things to add into reactive func:
+# genre, console company, dev, pub, esrb, metacritic?, platform
+# even without model has practically
+# best rated game first
+# most interesting combo of features
+# typical games with these feats are rating X based upon the toggled options
+# incorporate the model
+
 # Get the index of columns starting with "dev_"
 dev_index <- 6:40
 # Get the index of columns starting with "pub_"
@@ -27,20 +35,30 @@ mode_index <- 132:134
 # index of genre
 genre_index <- 135:140
 
-# Convert Fs to "no" and Ts to "yes" using mutate_at
-games_gt <- games_gt %>%
-  mutate_at(vars(6:length(games_gt)), ~ ifelse(. == TRUE, "Yes", "No"))
+# # Convert Fs to "no" and Ts to "yes" using mutate_at
+# games_gt <- games_gt %>%
+#   mutate_at(vars(6:length(games_gt)), ~ ifelse(. == TRUE, "Yes", "No"))
 
 # write to csv
 write_csv(games_gt, "gt.csv")
 
 # create initial GT table object
 games_table <- games_gt %>%
+  # drop the unnecessary columns
+  select(-(6:140)) %>%
+  # arrange always by metacritic rating first
+  arrange(desc(metacritic)) %>% 
+  # create the base gt table
   gt() %>% 
   # add title and subtitle
   tab_header(
     title = md("**GamerGate 2023 Games**"),
     subtitle = "Explore the data used to train the algorithm"
+  ) %>% 
+  # change date format
+  fmt_date(
+    columns = released,
+    date_style = "m_day_year"
   ) %>% 
   # color metacritic column based on values
   data_color(
@@ -71,11 +89,6 @@ games_table <- games_gt %>%
            )
          }
        ) %>%
-  cols_move(
-    `PlayStation 5`, `PlayStation 4`, `PlayStation 3`, `PS Vita`,
-    `PlayStation 2`, `PlayStation`, `Sony PSP`,
-    after = 
-  ) %>% 
   # add interactive search function to table
   opt_interactive(
     use_search = TRUE,
@@ -84,5 +97,3 @@ games_table <- games_gt %>%
 
 # display the table
 games_table
-
-?cols_label
