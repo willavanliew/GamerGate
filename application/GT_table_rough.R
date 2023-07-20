@@ -89,6 +89,11 @@ games_table <- games_gt %>%
            )
          }
        ) %>%
+  cols_move(
+    `PlayStation 5`, `PlayStation 4`, `PlayStation 3`, `PS Vita`,
+    `PlayStation 2`, `PlayStation`, `Sony PSP`,
+    after = 
+  ) %>% 
   # add interactive search function to table
   opt_interactive(
     use_search = TRUE,
