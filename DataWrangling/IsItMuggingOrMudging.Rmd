@@ -76,8 +76,7 @@ games %>% group_by(developers) %>% summarize(n=n()) %>% filter(n> 10)
 ```
 ```{r}
 cleaned_developers <- developers %>%
-  mutate(#dev_other = ifelse(n < 10, TRUE, FALSE),
-         dev_Atlus = str_detect(developers, "Atlus"),
+  mutate(dev_Atlus = str_detect(developers, "Atlus"),
          dev_BioWare = str_detect(developers, "BioWare"),
          dev_Blizzard = str_detect(developers, "Blizzard"),
          dev_Activision = str_detect(developers, "Activision"),
@@ -118,6 +117,93 @@ cleaned_developers <- cleaned_developers %>%
   mutate(dev_other = ifelse(developers %in% other_dev$developers, TRUE, FALSE)) %>%
   select(-n)
 
+```
+```{r}
+p1<-pub_dev %>%
+  mutate(dev_Atlus = str_detect(developers, "Atlus"),
+         dev_BioWare = str_detect(developers, "BioWare"),
+         dev_Blizzard = str_detect(developers, "Blizzard"),
+         dev_Activision = str_detect(developers, "Activision"),
+         dev_Ubisoft = str_detect(developers, "Ubisoft"),
+         dev_Rockstar = str_detect(developers, "Rockstar"),
+         dev_1C = str_detect(developers, "1C"),
+         dev_DICE = str_detect(developers, "DICE"),
+         dev_Capcom = str_detect(developers, "Capcom"),
+         dev_2K = str_detect(developers, "2K"),
+         dev_343Industries = str_detect(developers, "343 Industries"),
+         dev_CreativeAssembly = str_detect(developers, "Creative Assembly"),
+         dev_FromSoftware = str_detect(developers, "FromSoftware"),
+         dev_Vanguard = str_detect(developers, "Vanguard Games"),
+         dev_Arkane = str_detect(developers, "Arkane"),
+         dev_BandaiNamco = str_detect(developers, "Bandai Namco"),
+         dev_Bethesda = str_detect(developers, "Bethesda"),
+         dev_Bungie = str_detect(developers, "Bungie"),
+         dev_Crytek = str_detect(developers, "Crytek"),
+         dev_EA = str_detect(developers, "EA "),
+         dev_Nintendo = str_detect(developers, "Nintendo"),
+         dev_Ensemble = str_detect(developers, "Ensemble Studios"),
+         dev_EpicGames = str_detect(developers, "Epic Games"),
+         dev_Frontier = str_detect(developers, "Frontier Developments"),
+         dev_Feral = str_detect(developers, "Feral Interactive"),
+         dev_InfinityWard = str_detect(developers, "Infinity Ward"),
+         dev_Insomniac = str_detect(developers, "Insomniac Games"),
+         dev_JapanStudios = str_detect(developers, "Japan Studio"),
+         dev_Klei = str_detect(developers, "Klei Entertainment"),
+         dev_Konami = str_detect(developers, "Konami"),
+         dev_LucasArts = str_detect(developers, "LucasArts"),
+         dev_NaughtyDog = str_detect(developers, "Naughty Dog"),
+         dev_Namco = str_detect(developers, "Namco"),
+         dev_TellTale = str_detect(developers, "Telltale Games"),
+         dev_other = ifelse(developers %in% other_dev$developers, TRUE, FALSE),
+         pub_Eidos = str_detect(publishers, "Eidos Interactive"),
+         pub_EA = str_detect(publishers, "EA Games"),
+         pub_DeepSilver = str_detect(publishers, "Deep Silver"),
+         pub_ElectronicArts = str_detect(publishers, "Electronic Arts"),
+         pub_Ubisoft = str_detect(publishers, "Ubisoft"),
+         pub_Sega = str_detect(publishers, "Sega"),
+         pub_Activision = str_detect(publishers, "Activision"),
+         pub_SquareEnix = str_detect(publishers, "Square Enix"),
+         pub_Devolver = str_detect(publishers, "Devolver Digital"),
+         pub_Capcom = str_detect(publishers, "Capcom"),
+         pub_Konami = str_detect(publishers, "Konami"),
+         pub_BandaiNamco = str_detect(publishers, "Bandai Namco"),
+         pub_Paradox = str_detect(publishers, "Paradox Interactive"),
+         pub_Nintendo = str_detect(publishers, "Nintendo"),
+         pub_Sony = str_detect(publishers, "Sony"),
+         pub_koei = str_detect(publishers, "Koei"),
+         pub_rockstar = str_detect(publishers, "Rockstar"),
+         pub_THQ = str_detect(publishers, "THQ"),
+         pub_2K = str_detect(publishers, "2K"),
+         pub_D3 = str_detect(publishers, "D3"),
+         pub_vivendi = str_detect(publishers, "Vivendi"),
+         pub_majesco = str_detect(publishers, "Majesco"),
+         pub_microsoft = str_detect(publishers, "Microsoft"),
+         pub_505 = str_detect(publishers, "505 Games"),
+         pub_Atari = str_detect(publishers, "Atari"),
+         pub_Spike = str_detect(publishers, "Spike"),
+         pub_RisingStar = str_detect(publishers, "Rising Star"),
+         pub_Midway = str_detect(publishers, "Midway"),
+         pub_Spike = str_detect(publishers, "LucasArts"),
+         pub_WarnerBros = str_detect(publishers, "Warner Bros"),
+         pub_Atlus = str_detect(publishers, "Atlus"),
+         pub_Codemasters = str_detect(publishers, "Codemasters"),
+         pub_Disney = str_detect(publishers, "Disney"),
+         pub_Blizzard = str_detect(publishers, "Blizzard"),
+         pub_Bethesda = str_detect(publishers, "Bethesda"),
+         pub_Curve = str_detect(publishers, "Curve Digital"),
+         pub_1C = str_detect(publishers, "1C"),
+         pub_daedalic = str_detect(publishers, "Daedalic Entertainment"),
+         pub_FocusHome = str_detect(publishers, "Focus Home Interactive"),
+         pub_HumbleBumble = str_detect(publishers, "Humble Bumble"),
+         pub_Kalypso = str_detect(publishers, "Kalypso Media"),
+         pub_TellTale = str_detect(publishers, "Telltale Games"),
+         pub_Team17 = str_detect(publishers, "Team17"),
+         pub_Valve = str_detect(publishers, "Valve"),
+         pub_Xbox = str_detect(publishers, "Xbox Game Studios"),
+         pub_tinyBuild = str_detect(publishers, "tinyBuild"),
+         pub_other = ifelse(publishers %in% other_pubs$publishers, TRUE, FALSE),
+         pub_EA = ifelse(publishers == "EU: IDEA GamesNA: Meridian4 Bohemia Interactive", FALSE, pub_EA),
+         pub_other = ifelse(publishers == "EU: IDEA GamesNA: Meridian4 Bohemia Interactive", TRUE, pub_other))
 ```
 
 
@@ -189,8 +275,8 @@ pub_dev1 <- pub_dev %>%
 cleaned_pub_dev <- pub_dev1 %>%
   left_join(clean_pubs, by = "publishers")
 
-export(cleaned_pub_dev, "~/Documents/DS-Masters/Capstone/GamerGate/DataVisualization/CurrentVisualization/Final_dev_pub.csv")
-setdiff(games, pub_dev)
+#export(cleaned_pub_dev, "~/Documents/DS-Masters/Capstone/GamerGate/DataVisualization/CurrentVisualization/Final_dev_pub.csv")
+#setdiff(games, pub_dev)
 
 cleaned_pub_dev %>%
   select(-c(released_metacritic, playtime, ))
@@ -332,7 +418,7 @@ ds <- convertToBinary(ds, (95:140)) %>% distinct()
 ds <- ds %>% pivot_wider(names_from = "gamemodes", values_from ="gamemodes")
 
 ds <- convertToBinary(ds, (140:142))
-export(ds, "~/Documents/DS-Masters/Capstone/GamerGate/DataVisualization/CurrentVisualization/Final_dev_pub.csv")
+#export(ds, "~/Documents/DS-Masters/Capstone/GamerGate/DataVisualization/CurrentVisualization/Final_dev_pub.csv")
 
 ds <- ds %>% pivot_wider(names_from = "genre", values_from = "genre")
 
@@ -340,6 +426,44 @@ ds<- convertToBinary(ds, c(142:147))
 
 ds <- ds %>% select(-description)
 
-export(ds, "~/Documents/DS-Masters/Capstone/GamerGate/application/Final_dev_pub.csv")
+#export(ds, "~/Documents/DS-Masters/Capstone/GamerGate/application/Final_dev_pub.csv")
 ```
+```{r}
+publishers <- clean_pubs %>% select(c(3:47)) %>% names() %>% str_replace("pub_", "")
+publishers_col <- clean_pubs %>% select(c(3:47)) %>% names()
+
+publisher_titles <- tibble(Name = publishers, Column = publishers_col)
+
+developers <- cleaned_developers %>% select(c(2:36)) %>% names() %>% str_replace("dev_", "")
+developers_col <- cleaned_developers %>% select(c(2:36)) %>% names()
+
+developer_titles <- tibble(Name = developers, Column = developers_col)
+
+write_csv(publisher_titles, "~/Documents/DS-Masters/Capstone/GamerGate/application/publisher_titles.csv")
+write_csv(developer_titles, "~/Documents/DS-Masters/Capstone/GamerGate/application/developer_titles.csv")
+```
+
+platforms <- 91: 136
+genre <- 140: 145
+```{r}
+platform_names <- ds %>% select(c(91:136)) %>% names()
+
+genre_names <- ds %>% select(c(140:145)) %>% names()
+
+
+p2 <- p1 %>% pivot_longer(cols = starts_with("dev_"), names_to = "dev", names_prefix = "dev_", values_to = "dev_val")
+
+p3 <- p2 %>%
+  pivot_longer(cols = starts_with("pub_"), names_to = "pub", names_prefix = "pub_", values_to = "pub_val")
+```
+
+
+```{r}
+games_app <- p3 %>%
+  filter(pub_val == TRUE, dev_val == TRUE) %>%
+  select(-c(dev_val, pub_val, background_image, description,genres, developers, publishers))
+
+write_csv(games_app, "~/Documents/DS-Masters/Capstone/GamerGate/application/games_app.csv")
+```
+
 

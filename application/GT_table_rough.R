@@ -4,6 +4,7 @@ p_load(tidyverse,colorspace,RColorBrewer,htmltools,plotly,ggpubr,thematic,shinyt
 # Reading in datasets
 games <- read_csv("Final_dev_pub.csv")
 
+
 # Create dataset for use in gt table
 games_gt <- games %>%
   select(-c(id, developers, publishers, genres, playtime))

@@ -1,7 +1,7 @@
 ---
 title: "Metacritic Categories V2"
 description: "WORK IN PROGRESS, WE TO IDENTIFY FEATURES"
-author: "Brian Cervantes Alvarez"
+author: "Brian Cervantes Alvarez", "Jack?!?!?!"
 date: "07-03-2023"
 format:
   html:
@@ -12,74 +12,63 @@ format:
 execute: 
   warning: false
   message: false
-categories: [Python, Machine Learning, NLP]
+categories: [Python, Machine Learning]
 jupyter: python3
 ---
 
-## Libaries for data manipulation, analysis, visualization, natural language processing, and machine learning using various libraries.
+## Machine Learning Model Imports
+
+This contains import statements for various machine learning models along with other necessary libraries. These models include Support Vector Classifier (SVC), Random Forest Classifier, Gradient Boosting Classifier, and Logistic Regression, which are commonly used for classification tasks. Additionally, the code imports evaluation metrics and data preprocessing tools to facilitate model evaluation and feature scaling.
+
 ```{python}
 # Importing the pandas library for data manipulation and analysis
-import pandas as pd
+import pandas as pd  # Pandas is a powerful library for data manipulation and analysis, providing data structures and functions.
 
 # Importing the NumPy library for numerical operations
-import numpy as np
+import numpy as np  # NumPy is used for numerical computations, providing support for arrays and mathematical functions.
 
 # Importing the seaborn library for data visualization
-import seaborn as sns
+import seaborn as sns  # Seaborn is a high-level data visualization library based on Matplotlib, making it easy to create attractive visualizations.
 
 # Importing the matplotlib library for creating plots and charts
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # Matplotlib is a comprehensive library for creating various types of plots and charts.
 
-# Importing the nltk library for natural language processing tasks
-import nltk
-
-# Importing the re module for regular expressions
-import re
-
-# Importing stopwords from the nltk.corpus module
-from nltk.corpus import stopwords
-
-# Importing the WordNetLemmatizer from the nltk.stem module
-from nltk.stem import WordNetLemmatizer
-
-# Importing Counter from the collections module
-from collections import Counter
+# Importing the Support Vector Classifier and other models from the sklearn module
+from sklearn.svm import SVC  # SVC is a popular classification algorithm for Support Vector Machines.
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier  # Ensemble learning methods based on decision trees, commonly used for classification tasks.
+from sklearn.linear_model import LogisticRegression  # LogisticRegression is a popular algorithm for binary and multiclass classification problems.
 
 # Importing train_test_split for splitting the data into training and testing sets
-from sklearn.model_selection import train_test_split,  cross_val_score
+from sklearn.model_selection import (
+    train_test_split,
+    cross_val_score,
+    RepeatedStratifiedKFold,
+)  # These functions are used for data splitting and cross-validation during model evaluation.
 
 # Importing the MinMaxScaler for feature scaling
-from sklearn.preprocessing import MinMaxScaler
-
-# Importing the RandomForestClassifier from the sklearn.ensemble module
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import MinMaxScaler  # MinMaxScaler is used to scale features to a specific range, typically [0, 1].
 
 # Importing evaluation metrics from the sklearn.metrics module
 from sklearn.metrics import (
-
     cohen_kappa_score,
     roc_auc_score,
+    make_scorer,
     accuracy_score,
     precision_score,
     recall_score,
     confusion_matrix,
-)
+)  # These metrics are used to evaluate the performance of classification models.
 
 # Importing GridSearchCV from the sklearn.model_selection module
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV  # GridSearchCV is used for hyperparameter tuning to find the best model configuration.
+
+from sklearn.feature_selection import SelectKBest, chi2, SelectFromModel
+
 ```
 
 ## Data Preprocessing and Analysis
 
-These operations demonstrate common data preprocessing tasks such as reading data, removing columns, handling missing values, creating new columns, converting data types, and performing basic analysis on the data.
-
-1. The CSV file "gamesMetacritic.csv" is read into a DataFrame called games, and the shape of the DataFrame is printed.
-
-2. Columns with missing values are identified and stored in the columns_with_missing_values list.
-
-3. The number of missing values is printed for each column with missing values.
-
-4. The missing values are dropped from the DataFrame using the `drop
+This processes data from a CSV file containing information about video games from RAWG's API. It categorizes the games based on their ratings into "Poor," "Mixed," "Good," "Great," "Excellent," or "Masterpiece." Additionally, it adds a "season" column to indicate the season when each game was released and a "playtime_category" column to group the games based on their playtime, such as "Novice," "Casual," "Experienced," or "Veteran." The code ensures missing values are removed to prepare the data for analysis.
 
 ```{python}
 # Read the CSV file into a DataFrame
@@ -142,6 +131,9 @@ games.dropna(inplace=True)
 
 ```
 
+
+This refines and organizes the "genres" column in a dataset containing information about video games. It splits the genres into subgenres, capitalizes them, and creates new rows for each subgenre. The code then updates the DataFrame to include the subgenres' information, and it lists all the columns in the final dataset. This process helps in better categorizing and understanding the various subgenres of video games present in the dataset.
+
 ```{python}
 # Clean up the genres column
 games['genres'] = games['genres'].str.replace('\[.*?\]', '')  # Remove anything within square brackets [...]
@@ -179,7 +171,7 @@ for index, row in games.iterrows():
 games = pd.DataFrame(new_rows)
 
 # Capitalize the "subgenres" column
-games['subgenres'] = new_games['subgenres'].str.title()
+games['subgenres'] = games['subgenres'].str.title()
 
 # Display the updated dataset with subgenres information
 print(games)
@@ -190,7 +182,7 @@ print(list(games.columns))
 
 ## Feature Engineering
 
-The code block performs the conversion of specified categorical columns into dummy variables in the modelDs DataFrame. The columns to be converted are specified in the columns_to_dummy list. Using the pd.get_dummies() function, dummy variables are created for each unique value in these columns, with column names prefixed by the original column names. The drop_first=True parameter ensures that the first dummy variable for each column is dropped to avoid multicollinearity. The resulting dummy variables are then concatenated with the original modelDs DataFrame using pd.concat(). Finally, the original categorical columns are dropped from the modelDs DataFrame using drop() with the axis=1 parameter. This process transforms categorical variables into numerical representations, making them suitable for machine learning algorithms that require numeric input.
+This enhances the video game dataset with several new features. It adds a "Multiplatform" column to identify games available on multiple platforms, a "year" column to show the release year of each game, a "metacritic trend line" column to indicate the score trend over the years, a "playtime trend line" column to represent the playtime trend over the years, "playtime quartiles" to categorize games based on their playtime distribution, and "playtime ratios" to calculate the playtime of each game as a ratio of the maximum playtime in the dataset. The code also filters the dataset to include games released in 2013 or later. These new features provide valuable insights into the video game data and can assist in further analysis and decision-making.
 
 ```{python}
 # ADD FEATURE: Multi-Platform, etc.
@@ -231,7 +223,7 @@ grouped.loc[grouped['yoy_diff'] > 0, 'trend_line_metacritic_yoy'] = 'Positive'
 grouped.loc[grouped['yoy_diff'] < 0, 'trend_line_metacritic_yoy'] = 'Negative'
 grouped.loc[grouped['yoy_diff'] == 0, 'trend_line_metacritic_yoy'] = 'Stable'
 
-# Merge the trend line column back into the 'games' DataFrame
+# Merge the trend line column back
 games = pd.merge(games, grouped[['year', 'metacritic_category', 'trend_line_metacritic_yoy']], on=['year', 'metacritic_category'], how='left')
 
 # ADD FEATURE: playtime trend line
@@ -250,7 +242,7 @@ grouped.loc[grouped['yoy_diff'] > 0, 'trend_line_playtime_yoy'] = 'Increasing'
 grouped.loc[grouped['yoy_diff'] < 0, 'trend_line_playtime_yoy'] = 'Decreasing'
 grouped.loc[grouped['yoy_diff'] == 0, 'trend_line_playtime_yoy'] = 'Stable'
 
-# Merge the trend line column back into the 'games' DataFrame
+# Merge the trend line column
 games = pd.merge(games, grouped[['year', 'trend_line_playtime_yoy']], on='year', how='left')
 
 # ADD FEATURES: playtime quartiles
@@ -277,107 +269,130 @@ max_playtime = games['playtime'].max()
 games['playtime_ratio'] = games['playtime'] / max_playtime
 
 
-# ADD FEATURES: interactions variables
+# Filter video game year from 2013 forward
+games = games[games['year'] >= 2013]
 
-# DO NOT ADD AT THIS MOMENT
-
-games.head(10)
-print(list(games.columns))
 ```
 
-```{python}
-# Save the 'id' column before removing it from the DataFrame
-id_column = games['id']
+This removes specific columns from a dataset containing information about video games. The columns that are removed include 'id', 'background_image', 'metacritic', 'name', 'playtime', 'description', 'released', 'developers', 'publishers', and 'n'. After removing these columns, the code prints the new shape of the dataset and lists the remaining columns. This process helps to focus on the most relevant information and simplifies the dataset for further analysis or modeling.
 
+```{python}
 # Remove the specified columns
 columns_to_remove = ['id', 'background_image', 'metacritic', 'name', 'playtime', 'description', 'released', 'developers', 'publishers','n']
 games.drop(columns_to_remove, axis=1, inplace=True)
-print(games.shape)
 
+# Print the new shape of the DataFrame after removing columns
+print("Shape of games DataFrame:", games.shape)
+
+# Create a new DataFrame 'modelDs' to store the modified data
 modelDs = games
-print(list(modelDs.columns))
+
+# Print the list of columns
+print("Columns in modelDs DataFrame:", list(modelDs.columns))
 ```
 
-## Dummy Columns
+### Convert Categorical Columns to Dummy Variables
+
+This converts categorical columns in the "modelDs" DataFrame into dummy variables to represent them as binary indicators. The categorical columns that are converted include 'esrb_rating_name', 'genre', 'season', 'subgenres', 'playtime_category', 'subgenres', 'year', 'trend_line_metacritic_yoy', 'trend_line_playtime_yoy', and 'playtime_quartile'. After creating the dummy variables, the original categorical columns are removed from the DataFrame to prepare the data for machine learning tasks, where numerical data is generally required. This process helps in encoding categorical information into a format that machine learning algorithms can work with.
 
 ```{python}
-columns_to_dummy = ['esrb_rating_name', 'genre', 'season', 'subgenres',
-                    'playtime_category', 'subgenres', 'year',
-                    'trend_line_metacritic_yoy', 'trend_line_playtime_yoy',
-                    'playtime_quartile']
+# List of categorical columns to convert to dummy variables
+columns_to_dummy = ['esrb_rating_name', 'genre', 'season', 'subgenres', 'playtime_category', 'subgenres', 'year', 'trend_line_metacritic_yoy', 'trend_line_playtime_yoy', 'playtime_quartile']
 
+# Display the current shape 
 print("Shape of modelDs DataFrame:", modelDs.shape)
+
+# Display the number of columns 
 print("Number of columns in modelDs DataFrame:", modelDs.shape[1])
+
+# Display the expected number of columns after converting categorical columns to dummy variables
 print("Expected number of columns:", len(columns_to_dummy))
+
+# Display the list of columns that will be converted to dummy variables
 print("Columns to dummy:", columns_to_dummy)
 
-prefix = columns_to_dummy[:-1]  # Remove the last element from the prefix list
+# Remove the last element from the 'columns_to_dummy' list to create prefixes for dummy variable column names
+prefix = columns_to_dummy[:-1]
 
+# Convert categorical columns to dummy variables, adding prefixes to the column names
 dummy_cols = pd.get_dummies(modelDs[columns_to_dummy], prefix=prefix, drop_first=True)
+
+# Concatenate the dummy variable columns 
 modelDs = pd.concat([modelDs, dummy_cols], axis=1)
+
+# Drop the original categorical columns 
 modelDs.drop(columns_to_dummy, axis=1, inplace=True)
 
+# 'modelDs' DataFrame now contains the data with dummy variables instead of categorical columns
 modelDs
 ```
+
+### Calculate Relative Frequencies of Game Ratings
+
+This calculates the relative frequencies (weights) for each category in the "metacritic_category" column of the video game dataset. These weights represent the proportion of games falling into each rating category (e.g., "Poor," "Good," "Excellent") relative to the total number of games in the dataset. Printing the weights allows for understanding the distribution of game ratings and their respective frequencies in the dataset.
+
+```{python}
+# Calculate the relative frequencies (weights) for each category
+weights = games['metacritic_category'].value_counts(normalize=True)
+
+# Print the weights
+print(weights)
+```
+
 
 
 ## Random Forest Classifier with Hyperparameter Tuning and Evaluation
 
-The code block involves the following steps for building and evaluating a model:
-
-1. The data is split into training and testing sets using the `train_test_split()` function. The features (input variables) are stored in `X`, and the target variable is stored in `y`.
-2. A parameter grid is defined to specify different combinations of hyperparameters for tuning. The hyperparameters considered are the number of trees in the forest (`n_estimators`), the maximum depth of each tree (`max_depth`), and the minimum number of samples required to split an internal node (`min_samples_split`).
-3. A random forest classifier is created using `RandomForestClassifier()`.
-4. Grid search with cross-validation is performed using `GridSearchCV()` to find the best combination of hyperparameters. The grid search is conducted on the training set.
-5. The best hyperparameters are retrieved using `best_params_`.
-6. The best model is obtained using `best_estimator_` from the grid search results.
-7. Predictions are made on the testing set using the best model.
-8. Class probabilities are calculated using `predict_proba()`.
-9. The ROC AUC score is calculated using `roc_auc_score()`.
-10. The Kappa coefficient is calculated using `cohen_kappa_score()`.
-11. Accuracy is calculated using `accuracy_score()`.
-12. Precision is calculated using `precision_score()`.
-13. Recall is calculated using `recall_score()`.
-14. The confusion matrix is calculated using `confusion_matrix()`.
-
-These steps involve training and evaluating a random forest classifier with hyperparameter tuning using grid search. The resulting model's performance is assessed using various evaluation metrics such as ROC AUC score, Kappa coefficient, accuracy, precision, recall, and the confusion matrix.
+This prepares the data for machine learning by splitting it into features (X) and the target variable (y). The target variable represents game ratings (e.g., 'Masterpiece', 'Great', 'Good', 'Poor', 'Excellent', 'Mixed'), each with an associated weight. The data is further split into training and testing sets while ensuring the same distribution of game ratings in both sets using the 'stratify' parameter. The weights for each category are calculated and printed for the training and testing sets, facilitating the model's training with weighted samples and evaluation on a representative test set.
 
 ```{python}
 # Split the data into features (X) and target (y)
 X = modelDs.drop('metacritic_category', axis=1)  # Features (input variables)
 y = modelDs['metacritic_category']  # Target variable
 
-# Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=154)
+# Given weights
+weights = {'Masterpiece': 0.183429, 'Great': 0.176133, 'Good': 0.169359, 'Poor': 0.167275, 'Excellent': 0.164148, 'Mixed': 0.139656}
 
-# Define the final hyperparameters
-param_grid = {
-    'n_estimators': 300,
-    'max_depth': None,
-    'min_samples_split': 2,
-    'min_samples_leaf': 1,
-    'criterion': 'entropy',
-    'min_impurity_decrease': 0.0
-}
+# Use the 'stratify' parameter to preserve the target variable distribution in the train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=154, stratify=y)
 
-# Create the RandomForestClassifier instance with the final hyperparameters
-rf_classifier = RandomForestClassifier(**param_grid)
+# Now, you can access the weights for each category as follows:
+# Note that `y_train` and `y_test` now have the same distribution of categories as `y`
+y_train_weights = y_train.map(weights)
+y_test_weights = y_test.map(weights)
 
-# Perform cross-validation and print out the average accuracy
-cv_scores = cross_val_score(rf_classifier, X_train, y_train, cv=5)
-print("Cross-Validation Scores:", cv_scores)
-print("Average Accuracy:", cv_scores.mean())
+# Print the weights for the first few rows in the training set
+print("Training set weights:")
+print(y_train_weights.head())
 
-# Fit the classifier to the training data
-rf_classifier.fit(X_train, y_train)
+# Print the weights for the first few rows in the testing set
+print("Testing set weights:")
+print(y_test_weights.head())
 
-# Use the trained classifier for predictions
-y_pred = rf_classifier.predict(X_test)
+```
 
-# Make predictions with class probabilities
-y_pred_prob = rf_classifier.predict_proba(X_test)
+This creates and trains a machine learning model called the RandomForestClassifier with optimized hyperparameters. The model is trained using the training data, and predictions are made on the test data to evaluate its performance. Metrics such as ROC AUC score, Kappa coefficient, accuracy, precision, recall, and confusion matrix are calculated to assess how well the model predicts the game ratings. These metrics provide insights into the model's overall performance and its ability to correctly classify games into different rating categories.
 
-# Calculate ROC AUC score
+```{python}
+# Create the RandomForestClassifier instance with the best hyperparameters
+rf_classifier_best = RandomForestClassifier(
+    n_estimators=200,
+    max_depth=None,
+    min_samples_split=2,
+    min_samples_leaf=1,
+    criterion='gini',
+    min_impurity_decrease=0.0,
+    random_state=65
+)
+
+# Fit the classifier to the training data with the given weights
+rf_classifier_best.fit(X_train, y_train, sample_weight=y_train_weights)
+
+# Use the trained classifier for predictions on test data
+y_pred = rf_classifier_best.predict(X_test)
+y_pred_prob = rf_classifier_best.predict_proba(X_test)
+
+# Calculate ROC AUC score for binary classification
 roc_auc = roc_auc_score(y_test, y_pred_prob, multi_class='ovr')
 print(f"ROC AUC: {roc_auc}")
 
@@ -403,26 +418,106 @@ print("Confusion Matrix:")
 print(confusion)
 
 
-# Feature selection for the top 25 features overall
+```
+
+This demonstrates three different methods to select the most important features from the video game dataset for machine learning models. Method 1 uses the SelectKBest algorithm with chi-square to select the top 25 features. Method 2 uses the SelectFromModel algorithm with L1 regularization (Logistic Regression) to identify another set of top 25 features. Method 3 utilizes the Tree-based Feature Importance approach with Random Forest to determine the third set of top 25 features. The code prints these selected features for each method and then merges them to create a new dataset containing only the most relevant features for training the machine learning model. This feature selection process helps improve the model's performance and reduces computation time by focusing on the most informative features.
+
+```{python}
+# Limits the top number of features
+num_features_to_select = 16
+
+# Method 1: SelectKBest with chi-square
+selector_chi2 = SelectKBest(score_func=chi2, k=num_features_to_select)
+X_train_chi2_selected = selector_chi2.fit_transform(X_train, y_train)
+selected_feature_indices_chi2 = selector_chi2.get_support(indices=True)
+selected_features_chi2 = X_train.columns[selected_feature_indices_chi2].tolist()
+
+plt.figure(figsize=(8, 4))
+plt.barh(range(num_features_to_select), selector_chi2.scores_[selected_feature_indices_chi2][::-1], tick_label=selected_features_chi2[::-1])
+plt.xlabel('Chi-square Score')
+plt.ylabel('Features')
+plt.title('Top Features using SelectKBest with chi-square')
+plt.show()
+
+# Method 2: SelectFromModel with L1 regularization (Logistic Regression)
+logistic_regression = LogisticRegression(penalty='l1', solver='liblinear', random_state=65)
+selector_l1 = SelectFromModel(logistic_regression, max_features=num_features_to_select)
+X_train_l1_selected = selector_l1.fit_transform(X_train, y_train)
+selected_feature_indices_l1 = selector_l1.get_support(indices=True)
+selected_features_l1 = X_train.columns[selected_feature_indices_l1].tolist()
+
+# Get coefficients from the best estimator with L1 regularization
+coefficients = abs(selector_l1.estimator_.coef_[0])
+
+plt.figure(figsize=(8, 4))
+plt.barh(range(num_features_to_select), coefficients[selected_feature_indices_l1][::-1], tick_label=selected_features_l1[::-1])
+plt.xlabel('Coefficient Magnitude')
+plt.ylabel('Features')
+plt.title('Top Features using SelectFromModel with L1 regularization (Logistic Regression)')
+plt.show()
+
+# Method 3: Tree-based Feature Importance (Random Forest)
+rf_classifier = RandomForestClassifier(random_state=65)
 rf_classifier.fit(X_train, y_train)
 feature_importances = rf_classifier.feature_importances_
-top_features_indices = feature_importances.argsort()[-22:][::-1]
-top_features = X_train.columns[top_features_indices].tolist()
+top_features_indices_rf = feature_importances.argsort()[-num_features_to_select:][::-1]
+top_features_rf = X_train.columns[top_features_indices_rf].tolist()
 
-# Select the top 25 features overall to create a new dataset
-X_train_selected = X_train[top_features]
-X_test_selected = X_test[top_features]
+plt.figure(figsize=(8, 4))
+plt.barh(range(num_features_to_select), feature_importances[top_features_indices_rf][::-1], tick_label=top_features_rf[::-1])
+plt.xlabel('Feature Importance')
+plt.ylabel('Features')
+plt.title('Top Features using Tree-based Feature Importance (Random Forest)')
+plt.show()
 
+# Print the top 25 features for each method
+print("Top 25 Features using SelectKBest with chi-square:")
+print(selected_features_chi2)
+
+print("\nTop 25 Features using SelectFromModel with L1 regularization (Logistic Regression):")
+print(selected_features_l1)
+
+print("\nTop 25 Features using Tree-based Feature Importance (Random Forest):")
+print(top_features_rf)
+
+# Combine selected features from all three methods without duplicates
+all_selected_features = list(set(selected_features_chi2 + selected_features_l1 + top_features_rf))
+
+# Create a new dataset with the selected features
+X_train_selected = X_train[all_selected_features]
+X_test_selected = X_test[all_selected_features]
+
+
+print(len(X_train_selected.columns))  # Merged features, it should be 40 columns
+print(len(X_test_selected.columns))   # Merged features, it should be 40 columns
+
+```
+
+This trains the final machine learning model, called the RandomForestClassifier, using the selected important features from the video game dataset. The model is constructed with 200 decision trees and optimized hyperparameters. It is then trained on the training dataset, considering the weights associated with each game rating category. After training, the model is used to make predictions on the test dataset. Additionally, the code computes the probabilities of the predicted game ratings using the final model. This process allows the model to predict game ratings based on the most relevant features identified during the feature selection step, resulting in a more accurate and efficient predictive model.
+
+```{python}
 # Train the final classifier with the selected features
-final_rf_classifier = RandomForestClassifier(**param_grid)
-final_rf_classifier.fit(X_train_selected, y_train)
+final_rf_classifier = RandomForestClassifier(
+    n_estimators=200,
+    max_depth=None,
+    min_samples_split=2,
+    min_samples_leaf=1,
+    criterion='gini',
+    min_impurity_decrease=0.0,
+    random_state = 23
+)
+final_rf_classifier.fit(X_train_selected, y_train, sample_weight = y_train_weights)
 
 # Use the final model for predictions
 y_pred_final = final_rf_classifier.predict(X_test_selected)
 
 # Make predictions with class probabilities using the final model
 y_pred_prob_final = final_rf_classifier.predict_proba(X_test_selected)
+```
 
+This evaluates the final machine learning model's performance, called the RandomForestClassifier, which was trained to predict game ratings using important features from the video game dataset. The model's performance is assessed using various evaluation metrics. The metrics include ROC AUC score, which measures the model's ability to distinguish between different game ratings, the Kappa coefficient, which indicates the model's agreement with the actual ratings, accuracy, which represents the overall correctness of predictions, precision, which shows the model's ability to predict each rating category accurately, and recall, which measures the model's ability to capture all instances of each rating category. Finally, the code prints the confusion matrix, a table that summarizes the model's predictions against the actual game ratings. These evaluations help understand how well the final model performs in predicting game ratings and provide valuable insights into its effectiveness in classifying games into their respective categories.
+
+```{python}
 # Evaluate the final model
 # Calculate ROC AUC score for the final model
 roc_auc_final = roc_auc_score(y_test, y_pred_prob_final, multi_class='ovr')
@@ -449,13 +544,10 @@ confusion_final = confusion_matrix(y_test, y_pred_final)
 print("Confusion Matrix (Final Model):")
 print(confusion_final)
 
-```
-
-## TOP 22 FEATURES
-```{python}
+# TOP 40 FEATURES
 print(X_train_selected.columns)
-```
 
+```
 
 
 ## OTHER MODELS ---------------------------------------------------------------------
@@ -465,8 +557,6 @@ THEY HAVE NOT BEEN TUNED, NEITHER DO THEY HAVE FEATURES SELECTED...
 WORK IN PROGRESS
 
 ```{python}
-from sklearn.svm import SVC
-
 # Create the SVM classifier
 svm_classifier = SVC(probability = True)
 
@@ -476,7 +566,7 @@ print("SVM Cross-Validation Scores:", cv_scores_svm)
 print("Average SVM Accuracy:", cv_scores_svm.mean())
 
 # Fit the SVM classifier to the training data
-svm_classifier.fit(X_train, y_train)
+svm_classifier.fit(X_train, y_train, sample_weight=y_train_weights)
 
 # Use the trained SVM classifier for predictions
 y_pred_svm = svm_classifier.predict(X_test)
@@ -512,7 +602,7 @@ print(confusion_svm)
 
 
 ```{python}
-from sklearn.linear_model import LogisticRegression
+
 
 # Create the Logistic Regression classifier
 logreg_classifier = LogisticRegression()
@@ -523,7 +613,7 @@ print("Logistic Regression Cross-Validation Scores:", cv_scores_logreg)
 print("Average Logistic Regression Accuracy:", cv_scores_logreg.mean())
 
 # Fit the Logistic Regression classifier to the training data
-logreg_classifier.fit(X_train, y_train)
+logreg_classifier.fit(X_train, y_train, sample_weight=y_train_weights)
 
 # Use the trained Logistic Regression classifier for predictions
 y_pred_logreg = logreg_classifier.predict(X_test)
@@ -560,7 +650,7 @@ print(confusion_logreg)
 
 
 ```{python}
-from sklearn.ensemble import GradientBoostingClassifier
+
 
 # Create the Gradient Boosting classifier
 gb_classifier = GradientBoostingClassifier()
@@ -571,7 +661,7 @@ print("Gradient Boosting Cross-Validation Scores:", cv_scores_gb)
 print("Average Gradient Boosting Accuracy:", cv_scores_gb.mean())
 
 # Fit the Gradient Boosting classifier to the training data
-gb_classifier.fit(X_train, y_train)
+gb_classifier.fit(X_train, y_train, sample_weight=y_train_weights)
 
 # Use the trained Gradient Boosting classifier for predictions
 y_pred_gb = gb_classifier.predict(X_test)
