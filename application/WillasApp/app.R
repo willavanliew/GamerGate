@@ -1,8 +1,8 @@
 if(!require("pacman")) {install.packages("pacman");library(pacman)}
-p_load(tidyverse, colorspace, RColorBrewer,htmltools,plotly,ggpubr,thematic,shinythemes,shiny)
+p_load(tidyverse, colorspace, RColorBrewer,htmltools,plotly,rio,ggpubr,thematic,shinythemes,shiny)
 games <- import("application/Final_dev_pub.csv")
 dev_names <- import("application/developer_titles.csv")
-pub_names <- import("application/publisher_tites.csv")
+pub_names <- import("application/publisher_titles.csv")
 platform_names <- games %>% select(c(91:136)) %>% names()
 genres_names <- games %>% select(c(140:145)) %>% names() 
 
@@ -41,23 +41,30 @@ ui <- fluidPage(
 
 games_reactive <- reactive(
   # Make it so it only selects what we want to select 
-  
-  games %>%
-    
+  if (input$genre != "All") {
+    filters <- append(filters, input$genre)
+  }
+  if (input$console != "All"){
+    filters <- append(filters, input$console)
+  }
+  if (input$publisher != "All"){
+    filters <- append(filters, input$publisher)
+  }
+  if (input$developer != "All"){
+    filters <- append(filters, input$developer)
+  }
+  if (input$esrb != "All"){
+    filters <- append(filters, input$esrb)
+  }
 )
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  games %>%
+    
 
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white',
-             xlab = 'Waiting time to next eruption (in mins)',
-             main = 'Histogram of waiting times')
-    })
+  output$description <- renderText({
+    games_reactive()
+  })
 }
 
 # Run the application 
