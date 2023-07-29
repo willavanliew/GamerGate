@@ -182,16 +182,20 @@ ui <- fluidPage(
                sidebarPanel(
                  selectInput("genre", h3("Choose a genre"), 
                              choices = genres_names,
-                             selected = "All"), 
-                 selectInput("console", h3("Choose a Console Type"),
+                             selected = NULL), 
+                 selectInput("mode", h3("Choose a Mode"), 
+                             choices = c("Single-player","2-player co-op", "Multiplayer"),
+                             selected = NULL), 
+                 # Searches 
+                 selectizeInput("console", h3("Choose a Console Type"),
                              choices = platform_names,
-                             select = "All"),
-                 selectInput("publisher", h3("Choose a Publisher"),
+                             select = NULL),
+                 selectizeInput("publisher", h3("Choose a Publisher"),
                              choices = list(pub_names$Name), # selection -> filter on input$publisher, select column 
-                             select = "All"),
-                 selectInput("developer", h3("Choose a Developer"),
+                             select = NULL),
+                 selectizeInput("developer", h3("Choose a Developer"),
                              choices = list(dev_names$Name),
-                             select = "All")
+                             select = NULL)
                           ),
                          ),
               # define main page for gt table output
