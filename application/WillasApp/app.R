@@ -210,23 +210,26 @@ ui <- fluidPage(
              # Content for Tab 1
              sidebarLayout(
                sidebarPanel(
-                 selectInput("genre", h3("Choose a genre"), 
-                             choices = genres_names,
-                             selected = NULL), 
-                 selectInput("mode", h3("Choose a Mode"), 
-                             choices = c("Single-player","2-player co-op", "Multiplayer"),
-                             selected = NULL), 
+                 selectizeInput("genre", h3("Choose a genre"), 
+                                choices = c("", genres_names),
+                                selected = NULL), 
+                 selectizeInput("mode", h3("Choose a Mode"), 
+                                choices = c(" ",
+                                            "Single-player" = "Single-player",
+                                            "2-player co-op"="2-player co-op", 
+                                            "Multiplayer"="Multiplayer"),
+                                selected = NULL), 
                  # Searches 
                  selectizeInput("console", h3("Choose a Console Type"),
-                             choices = platform_names,
-                             select = NULL),
+                                choices = c("" , platform_names),
+                                select = NULL),
                  selectizeInput("publisher", h3("Choose a Publisher"),
-                             choices = list(pub_names$Name), # selection -> filter on input$publisher, select column 
-                             select = NULL),
+                                choices = c("", pub_codes), 
+                                select = NULL),
                  selectizeInput("developer", h3("Choose a Developer"),
-                             choices = list(dev_names$Name),
-                             select = NULL)
-                          ),
+                                choices = c("", dev_codes),
+                                select = NULL)
+                          )
                          ),
               # define main page for gt table output
              mainPanel(
