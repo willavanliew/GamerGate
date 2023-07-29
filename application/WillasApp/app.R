@@ -1,13 +1,16 @@
 if(!require("pacman")) {install.packages("pacman");library(pacman)}
 p_load(tidyverse, colorspace, RColorBrewer,htmltools,plotly,rio,ggpubr,thematic,shinythemes,shiny)
-games <- import("application/Final_dev_pub.csv")
-dev_names <- import("application/developer_titles.csv")
-pub_names <- import("application/publisher_titles.csv")
-platform_names <- games %>% select(c(91:136)) %>% names()
-genres_names <- games %>% select(c(140:145)) %>% names() 
-
-# get games_gt from csv
 games_gt <- read_csv("gt.csv")
+dev_names <- import("developer_titles.csv")$Name
+dev_codes <- import("developer_titles.csv")$Column
+names(dev_codes) <- dev_names
+pub_names <- import("publisher_titles.csv")$Name
+pub_codes <- import("publisher_titles.csv")$Column
+names(pub_codes) <- pub_names
+platform_names <- games_gt %>% select(c(86:131)) %>% names()
+names(platform_names) <- platform_names
+genres_names <- games_gt %>% select(c(135:140)) %>% names()
+names(genres_names)<- genres_names
 
 # Get the index of columns starting with "dev_"
 dev_index <- 6:40
@@ -19,7 +22,6 @@ platform_index <- 86:131
 mode_index <- 132:134
 # index of genre
 genre_index <- 135:140
-
 
 
 ### PLAYING AROUND WITH FUNCTIONS
@@ -73,7 +75,6 @@ search_pub <- function(x) {
     cat("Publisher not found:", gsub("pub_", "",x), "\n")
     return(NULL)
   }
-  
   return(result)
 }
 
@@ -214,14 +215,14 @@ ui <- fluidPage(
                                 choices = c("", genres_names),
                                 selected = NULL), 
                  selectizeInput("mode", h3("Choose a Mode"), 
-                                choices = c(" ",
+                                choices = c("",
                                             "Single-player" = "Single-player",
                                             "2-player co-op"="2-player co-op", 
                                             "Multiplayer"="Multiplayer"),
                                 selected = NULL), 
                  # Searches 
                  selectizeInput("console", h3("Choose a Console Type"),
-                                choices = c("" , platform_names),
+                                choices = c("", platform_names),
                                 select = NULL),
                  selectizeInput("publisher", h3("Choose a Publisher"),
                                 choices = c("", pub_codes), 
