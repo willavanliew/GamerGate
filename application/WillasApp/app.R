@@ -26,34 +26,55 @@ genre_index <- 135:140
 # A function that works to search the developer columns
 search_dev <- function(x) {
   dev_index <- 6:40  # Definition of dev_index
+  
   # add dev_ to user input
   x <- paste0("dev_", x)
+  
+  # Initialize result variable
+  result <- NULL
+  
   # Check if x matches any of the modified column names
-  if (x %in% colnames(games_gt[, dev_index])) {
+  if (x == "dev_All") {
+    # Return the entire data frame if "All" is provided
+    return(games_gt)
+  } else if (x %in% colnames(games_gt[, dev_index])) {
+    # Filter the data frame to get games by the specified developer
     result <- games_gt[games_gt[, dev_index][, x] == "Yes", ]
-    return(result)
   } else {
-    cat("Developer not found:", x, "\n")
+    # Developer not found
+    cat("Developer not found:", gsub("dev_", "",x), "\n")
     return(NULL)
   }
+  
+  return(result)
 }
 
 search_dev("Atlus")
 
 # A function that works to search the publisher columns
 search_pub <- function(x) {
-  # Get the index of columns starting with "pub_"
-  pub_index <- 41:85
+  pub_index <- 41:85  # Definition of pub_index
+  
   # add dev_ to user input
   x <- paste0("pub_", x)
+  
+  # Initialize result variable
+  result <- NULL
+  
   # Check if x matches any of the modified column names
-  if (x %in% colnames(games_gt[, pub_index])) {
+  if (x == "pub_All") {
+    # Return the entire data frame if "All" is provided
+    return(games_gt)
+  } else if (x %in% colnames(games_gt[, pub_index])) {
+    # Filter the data frame to get games by the specified publisher
     result <- games_gt[games_gt[, pub_index][, x] == "Yes", ]
-    return(result)
   } else {
-    cat("Publisher not found:", x, "\n")
+    # Publisher not found
+    cat("Publisher not found:", gsub("pub_", "",x), "\n")
     return(NULL)
   }
+  
+  return(result)
 }
 
 search_pub("Atlus")
@@ -62,15 +83,24 @@ search_pub("Atlus")
 search_platform <- function(x) {
   # index of platforms
   platform_index <- 86:131
-
+  
+  # Initialize result variable
+  result <- NULL
+  
   # Check if x matches any of the modified column names
-  if (x %in% colnames(games_gt[, platform_index])) {
+  if (x == "All") {
+    # Return the entire data frame if "All" is provided
+    return(games_gt)
+  } else if (x %in% colnames(games_gt[, platform_index])) {
+    # Filter the data frame to get games by the specified platform
     result <- games_gt[games_gt[, platform_index][, x] == "Yes", ]
-    return(result)
   } else {
+    # Publisher not found
     cat("Platform not found:", x, "\n")
     return(NULL)
   }
+  
+  return(result)
 }
 
 search_platform("PlayStation 5") # PS5 does not work but maybe we can add another column for it if we desire
