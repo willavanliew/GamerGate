@@ -220,7 +220,6 @@ ui <- fluidPage(
                                             "2-player co-op"="2-player co-op", 
                                             "Multiplayer"="Multiplayer"),
                                 selected = NULL), 
-                 # Searches 
                  selectizeInput("console", h3("Choose a Console Type"),
                                 choices = c("", platform_names),
                                 select = NULL),
