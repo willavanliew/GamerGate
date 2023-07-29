@@ -110,6 +110,10 @@ search_genre <- function(x) {
   }
 }
 
+gt_reactive <- reactive() {
+  # taking in the games_gt 
+  # take each of the individual functions and have the input values into the functions 
+}
 search_genre("Action")
 
 # create initial GT table object
@@ -178,7 +182,7 @@ ui <- fluidPage(
                sidebarPanel(
                  selectInput("genre", h3("Choose a genre"), 
                              choices = genres_names,
-                             selected = "All"),
+                             selected = "All"), 
                  selectInput("console", h3("Choose a Console Type"),
                              choices = platform_names,
                              select = "All"),
