@@ -1,16 +1,6 @@
 if(!require("pacman")) {install.packages("pacman");library(pacman)}
-p_load(tidyverse, colorspace, RColorBrewer,htmltools,plotly,rio,ggpubr,thematic,shinythemes,shiny)
+p_load(tidyverse, colorspace, RColorBrewer,htmltools,plotly,rio,ggpubr,thematic,shinythemes,shiny,gt)
 games_gt <- read_csv("gt.csv")
-dev_names <- import("developer_titles.csv")$Name
-dev_codes <- import("developer_titles.csv")$Column
-names(dev_codes) <- dev_names
-pub_names <- import("publisher_titles.csv")$Name
-pub_codes <- import("publisher_titles.csv")$Column
-names(pub_codes) <- pub_names
-platform_names <- games_gt %>% select(c(86:131)) %>% names()
-names(platform_names) <- platform_names
-genres_names <- games_gt %>% select(c(135:140)) %>% names()
-names(genres_names)<- genres_names
 
 # Get the index of columns starting with "dev_"
 dev_index <- 6:40
@@ -51,8 +41,6 @@ search_dev <- function(x) {
   return(result)
 }
 
-search_dev("Atlus")
-
 # A function that works to search the publisher columns
 search_pub <- function(x) {
   pub_index <- 41:85  # Definition of pub_index
@@ -78,8 +66,6 @@ search_pub <- function(x) {
   return(result)
 }
 
-search_pub("Atlus")
-
 # A function that works to search the platform columns
 search_platform <- function(x) {
   # index of platforms
@@ -103,8 +89,7 @@ search_platform <- function(x) {
   
   return(result)
 }
-
-search_platform("PlayStation 5") # PS5 does not work but maybe we can add another column for it if we desire
+# PS5 does not work but maybe we can add another column for it if we desire
 # NOTE: Do we want to add in more dummies for PS5, PS4 as well as PlayStation 5 since people may search that?
 # Consider: converting to all caps in reactive func to make search case insensitive
 
@@ -123,7 +108,6 @@ search_mode <- function(x) {
   }
 }
 
-search_mode("2-player co-op")
 # in reactive function we definitely want a select drop down for gaming mode, not a search func
 
 # A function that works to search the gaming mode columns
@@ -141,65 +125,6 @@ search_genre <- function(x) {
   }
 }
 
-gt_reactive <- reactive() {
-  # taking in the games_gt 
-  # take each of the individual functions and have the input values into the functions 
-}
-search_genre("Action")
-
-# create initial GT table object
-games_table <- games_gt %>% # replace this with reactive dataset that is formed from search func
-  # drop the unnecessary columns
-  select(-(6:140)) %>%
-  # arrange always by metacritic rating first
-  arrange(desc(metacritic)) %>% 
-  # create the base gt table
-  gt() %>% 
-  # add title and subtitle
-  tab_header(
-    title = md("**GamerGate 2023 Games**"),
-    subtitle = "Explore the data used to train the algorithm"
-  ) %>% 
-  # change date format
-  fmt_date(
-    columns = released,
-    date_style = "m_day_year"
-  ) %>% 
-  # color metacritic column based on values
-  data_color(
-    columns = metacritic,
-    fn = scales::col_bin(
-      palette = "PuBu",
-      domain = range(games_gt$metacritic, na.rm=TRUE),
-      bins = c(0, 25, 50, 70, 80, 90, 100)
-    ),
-    alpha = 0.9
-  ) %>% 
-  # add official column names
-  cols_label(
-    name = md("**Game Title**"),
-    metacritic = md("**Metacritic Rating**"),
-    released = "Release Date",
-    esrb_rating_name = "ESRB Rating",
-    background_image = "Background Image") %>% 
-  # Add images to GT table
-  text_transform(
-    # Apply a function to a column to return the game logo
-    locations = cells_body(background_image),
-    fn = function(x) {
-      # Return an image of set dimensions
-      web_image(
-        url = x,
-        height = 60
-      )
-    }
-  ) %>%
-  # add interactive search function to table
-  opt_interactive(
-    use_search = TRUE,
-    use_page_size_select = TRUE
-  )
-
 # Define UI for application that draws a histogram
 ui <- fluidPage(
   # create two tabs
@@ -212,67 +137,146 @@ ui <- fluidPage(
              sidebarLayout(
                sidebarPanel(
                  selectizeInput("genre", h3("Choose a genre"), 
-                                choices = c("", genres_names),
+                                choices = colnames(games_gt[, genre_index]),
                                 selected = NULL), 
                  selectizeInput("mode", h3("Choose a Mode"), 
-                                choices = c("",
-                                            "Single-player" = "Single-player",
-                                            "2-player co-op"="2-player co-op", 
-                                            "Multiplayer"="Multiplayer"),
+                                choices = colnames(games_gt[, mode_index]),
                                 selected = NULL), 
+                 # Searches 
                  selectizeInput("console", h3("Choose a Console Type"),
-                                choices = c("", platform_names),
+                                choices = colnames(games_gt[, platform_index]),
                                 select = NULL),
                  selectizeInput("publisher", h3("Choose a Publisher"),
-                                choices = c("", pub_codes), 
+                                choices = gsub("pub_", "", colnames(games_gt[, pub_index])), 
                                 select = NULL),
                  selectizeInput("developer", h3("Choose a Developer"),
-                                choices = c("", dev_codes),
+                                choices = gsub("dev_", "", colnames(games_gt[, dev_index])),
                                 select = NULL)
-                          )
-                         ),
-              # define main page for gt table output
-             mainPanel(
-               # display gt table
-               gt_output("gt_table"),
-                      ),
-          ),
+               ),
+               
+               # define main page for gt table output
+               mainPanel(
+                 # display gt for selected table
+                 uiOutput("selected_table"),
+               ),
+             ),
+    ),
     tabPanel("ML Model Simulation",
              # Content for Tab 4
-            )
-  )
+    )
+  ),
 )
 
-games_reactive <- reactive(
-  # Make it so it only selects what we want to select 
-  if (input$genre != "All") {
-    filters <- append(filters, input$genre)
-  }
-  if (input$console != "All"){
-    filters <- append(filters, input$console)
-  }
-  if (input$publisher != "All"){
-    filters <- append(filters, input$publisher)
-  }
-  if (input$developer != "All"){
-    filters <- append(filters, input$developer)
-  }
-  if (input$esrb != "All"){
-    filters <- append(filters, input$esrb)
-  }
-)
-
-# Define server logic required to draw a histogram
+# Define server logic required to draw a gt table
 server <- function(input, output, session) {
-  games %>%
-    
-  # testing functionality
-  output$description <- renderText({
-    games_reactive()
+  
+  # create gt table object
+  create_games_gt <- function(df) {
+    df %>%
+      # drop the unnecessary columns
+      select(-(6:140)) %>%
+      # arrange always by metacritic rating first
+      arrange(desc(metacritic)) %>%
+      # create the base gt table
+      gt() %>%
+      # add title and subtitle
+      tab_header(
+        title = md("**GamerGate 2023 Games**"),
+        subtitle = "Explore the data used to train the algorithm"
+      ) %>%
+      # change date format
+      fmt_date(
+        columns = released,
+        date_style = "m_day_year"
+      ) %>%
+      # color metacritic column based on values
+      data_color(
+        columns = metacritic,
+        fn = scales::col_bin(
+          palette = "PuBu",
+          domain = range(games_gt$metacritic, na.rm = TRUE),
+          bins = c(0, 25, 50, 70, 80, 90, 100)
+        ),
+        alpha = 0.9
+      ) %>%
+      # add official column names
+      cols_label(
+        name = md("**Game Title**"),
+        metacritic = md("**Metacritic Rating**"),
+        released = "Release Date",
+        esrb_rating_name = "ESRB Rating",
+        background_image = "Background Image"
+      ) %>%
+      # Add images to GT table
+      text_transform(
+        # Apply a function to a column to return the game logo
+        locations = cells_body(background_image),
+        fn = function(x) {
+          # Return an image of set dimensions
+          web_image(
+            url = x,
+            height = 60
+          )
+        }
+      ) %>%
+      # add interactive search function to table
+      opt_interactive(
+        use_search = TRUE,
+        use_page_size_select = TRUE
+      )
+  }
+  
+  # Observe events for each input (developer, publisher, console, mode, and genre)
+  observeEvent(input$developer, {
+    dev_result <- search_dev(input$developer)
+    if (!is.null(dev_result)) {
+      output$selected_table <- render_gt({
+        create_games_gt(dev_result)
+      })
+    }
   })
   
-  # render gt table output
-  output$gt_table <- render_gt(games_table)
+  observeEvent(input$publisher, {
+    pub_result <- search_pub(input$publisher)
+    if (!is.null(pub_result)) {
+      output$selected_table <- render_gt({
+        create_games_gt(pub_result)
+      })
+    }
+  })
+  
+  observeEvent(input$console, {
+    console_result <- search_platform(input$console)
+    if (!is.null(console_result)) {
+      output$selected_table <- render_gt({
+        create_games_gt(console_result)
+      })
+    }
+  })
+  
+  observeEvent(input$mode, {
+    mode_result <- search_mode(input$mode)
+    if (!is.null(mode_result)) {
+      output$selected_table <- render_gt({
+        create_games_gt(mode_result)
+      })
+    }
+  })
+  
+  observeEvent(input$genre, {
+    genre_result <- search_genre(input$genre)
+    if (!is.null(genre_result)) {
+      output$selected_table <- render_gt({
+        create_games_gt(genre_result)
+      })
+    }
+  })
+  
+  # Initialize the table with all data at startup
+  output$selected_table <- render_gt({
+    create_games_gt(games_gt)
+  })
+  
 }
 
 # Run the application 
