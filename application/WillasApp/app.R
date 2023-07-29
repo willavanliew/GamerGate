@@ -191,9 +191,6 @@ ui <- fluidPage(
                              select = "All"),
                  selectInput("developer", h3("Choose a Developer"),
                              choices = list(dev_names$Name),
-                             select = "All"),
-                 selectInput("esrb", h3("Choose a ESRB Rating"),
-                             choices = list(unique(games$esrb_rating_name)),
                              select = "All")
                           ),
                          ),
