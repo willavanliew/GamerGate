@@ -13,6 +13,15 @@ mode_index <- 132:134
 # index of genre
 genre_index <- 135:140
 
+dev_names <- games_gt[, dev_index] %>% names
+names(dev_names) <- gsub("dev_","",dev_names)
+pub_names <- games_gt[, pub_index] %>% names
+names(pub_names) <- gsub("pub_", "", pub_names)
+platform_names <- games_gt[, platform_index] %>% names()
+names(platform_names) <- games_gt[, platform_index] %>% names()
+genres_names <- games_gt[, genre_index] %>% names()
+names(genres_names)<- games_gt[, genre_index] %>% names()
+
 
 ### PLAYING AROUND WITH FUNCTIONS
 # A function that works to search the developer columns
