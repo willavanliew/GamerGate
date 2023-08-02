@@ -170,9 +170,9 @@ ui <- fluidPage(
                ),
              ),
     ),
-    tabPanel("ML Model Simulation",
-             # Content for Tab 4
-    )
+    # tabPanel("ML Model Simulation",
+    #          # Content for Tab 4
+    #)
   ),
 )
 
