@@ -44,7 +44,7 @@ search_dev <- function(x) {
   } else {
     # Developer not found
     cat("Developer not found:", gsub("dev_", "",x), "\n")
-    return(NULL)
+    return(games_gt)
   }
   
   return(result)
@@ -69,8 +69,8 @@ search_pub <- function(x) {
     result <- games_gt[games_gt[, pub_index][, x] == "Yes", ]
   } else {
     # Publisher not found
-    cat("Publisher not found:", gsub("pub_", "",x), "\n")
-    return(NULL)
+    #cat("Publisher not found:", gsub("pub_", "",x), "\n")
+    return(games_gt)
   }
   return(result)
 }
@@ -92,8 +92,8 @@ search_platform <- function(x) {
     result <- games_gt[games_gt[, platform_index][, x] == "Yes", ]
   } else {
     # Publisher not found
-    cat("Platform not found:", x, "\n")
-    return(NULL)
+    #cat("Platform not found:", x, "\n")
+    return(games_gt)
   }
   
   return(result)
@@ -110,11 +110,12 @@ search_mode <- function(x) {
   # Check if x matches any of the modified column names
   if (x %in% colnames(games_gt[, mode_index])) {
     result <- games_gt[games_gt[, mode_index][, x] == "Yes", ]
-    return(result)
   } else {
-    cat("Mode not found:", x, "\n")
-    return(NULL)
+    #cat("Mode not found:", x, "\n")
+    return(games_gt)
   }
+  
+  return(result)
 }
 
 # in reactive function we definitely want a select drop down for gaming mode, not a search func
@@ -129,8 +130,9 @@ search_genre <- function(x) {
     result <- games_gt[games_gt[, genre_index][, x] == "Yes", ]
     return(result)
   } else {
-    cat("Genre not found:", x, "\n")
-    return(NULL)
+    return(games_gt)
+    #cat("Genre not found:", x, "\n")
+    #return(NULL)
   }
 }
 
@@ -145,21 +147,22 @@ ui <- fluidPage(
              # Content for Tab 1
              sidebarLayout(
                sidebarPanel(
-                 selectizeInput("genre", h3("Choose a genre"), 
-                                choices = colnames(games_gt[, genre_index]),
+                 selectizeInput("genre", h4("Choose a Genre"), 
+                                choices = c("", genres_names),
+                                #choices = colnames(games_gt[, genre_index]),
                                 selected = NULL), 
-                 selectizeInput("mode", h3("Choose a Mode"), 
-                                choices = colnames(games_gt[, mode_index]),
+                 selectizeInput("mode", h4("Choose a Mode"), 
+                                choices = c("", colnames(games_gt[, mode_index])),
                                 selected = NULL), 
                  # Searches 
-                 selectizeInput("console", h3("Choose a Console Type"),
-                                choices = colnames(games_gt[, platform_index]),
+                 selectizeInput("console", h4("Choose a Console Type"),
+                                choices = c("", colnames(games_gt[, platform_index])),
                                 select = NULL),
-                 selectizeInput("publisher", h3("Choose a Publisher"),
-                                choices = gsub("pub_", "", colnames(games_gt[, pub_index])), 
+                 selectizeInput("publisher", h4("Choose a Publisher"),
+                                choices = c("", gsub("pub_", "", colnames(games_gt[, pub_index]))), 
                                 select = NULL),
-                 selectizeInput("developer", h3("Choose a Developer"),
-                                choices = gsub("dev_", "", colnames(games_gt[, dev_index])),
+                 selectizeInput("developer", h4("Choose a Developer"),
+                                choices = c("",gsub("dev_", "", colnames(games_gt[, dev_index]))),
                                 select = NULL)
                ),
                
