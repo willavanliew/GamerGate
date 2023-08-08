@@ -207,7 +207,7 @@ server <- function(input, output, session) {
         fn = scales::col_bin(
           palette = "PuBu",
           domain = range(games_gt$metacritic, na.rm = TRUE),
-          bins = c(0, 25, 50, 70, 80, 90, 100)
+          bins = c(0, 67, 68, 73, 77, 81, 85, 100)
         ),
         alpha = 0.9
       ) %>%
@@ -245,6 +245,7 @@ server <- function(input, output, session) {
       output$selected_table <- render_gt({
         create_games_gt(dev_result)
       })
+      output$text <- renderText(paste0("You have selected Developer: ",input$developer))
     }
   })
   
