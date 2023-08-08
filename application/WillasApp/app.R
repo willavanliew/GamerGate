@@ -163,7 +163,8 @@ ui <- fluidPage(
                                 select = NULL),
                  selectizeInput("developer", h4("Choose a Developer"),
                                 choices = c("",gsub("dev_", "", colnames(games_gt[, dev_index]))),
-                                select = NULL)
+                                select = NULL),
+                 textOutput("text")
                ),
                
                # define main page for gt table output
@@ -173,9 +174,6 @@ ui <- fluidPage(
                ),
              ),
     ),
-    # tabPanel("ML Model Simulation",
-    #          # Content for Tab 4
-    #)
   ),
 )
 
@@ -255,6 +253,7 @@ server <- function(input, output, session) {
       output$selected_table <- render_gt({
         create_games_gt(pub_result)
       })
+      output$text <- renderText(paste0("You have selected Publisher: ",input$publisher))
     }
   })
   
@@ -264,6 +263,7 @@ server <- function(input, output, session) {
       output$selected_table <- render_gt({
         create_games_gt(console_result)
       })
+      output$text <- renderText(paste0("You have selected Platform: ",input$console))
     }
   })
   
@@ -273,6 +273,7 @@ server <- function(input, output, session) {
       output$selected_table <- render_gt({
         create_games_gt(mode_result)
       })
+      output$text <- renderText(paste0("You have selected Gaming Mode: ",input$mode))
     }
   })
   
@@ -282,6 +283,7 @@ server <- function(input, output, session) {
       output$selected_table <- render_gt({
         create_games_gt(genre_result)
       })
+      output$text <- renderText(paste0("You have selected Genre: ",input$genre))
     }
   })
   
